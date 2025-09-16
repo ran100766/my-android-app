@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
+import android.widget.ImageView
 
 class MainActivity : AppCompatActivity() {
 
@@ -74,6 +75,9 @@ class MainActivity : AppCompatActivity() {
         tvSpeed.text = "Speed: %.1f knots".format( speedKnots)
         tvDirection.text = "Direction: %.0f°".format(location.bearing)
         tvCoords.text = "Lat: %.5f, Lng: %.5f".format(location.latitude, location.longitude)
+
+        val arrow = findViewById<ImageView>(R.id.directionArrow)
+        arrow.rotation = location.bearing   // or azimuth
     }
 
 
