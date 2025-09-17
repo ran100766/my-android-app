@@ -11,6 +11,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import android.widget.ImageView
 import androidx.annotation.RequiresPermission
+import android.os.Handler
+import android.os.Looper
+import android.view.WindowManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +28,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
+
+//// Keep screen on
+//        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//
+//// Remove after 5 minutes
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//        }, 5 * 60 * 1000)
 
         tvSpeed = findViewById(R.id.tvSpeed)
         tvDirection = findViewById(R.id.tvDirection)
