@@ -78,9 +78,10 @@
             <ImageView
                 android:id="@+id/directionArrow"
                 android:layout_width="80dp"
-                android:layout_height="200dp"
+                android:layout_height="150dp"
                 android:src="@drawable/arrow"
                 app:tint="@android:color/holo_blue_dark"
+                android:scaleType="fitXY"
                 android:layout_gravity="center" />
         </FrameLayout>
     </LinearLayout>
