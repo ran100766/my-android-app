@@ -32,5 +32,9 @@
         android:id="@+id/directionArrow"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/arrow"/>
+        android:src="@drawable/arrow"
+        android:layout_gravity="center"
+        android:rotation="0"/>
+
+
 </LinearLayout>

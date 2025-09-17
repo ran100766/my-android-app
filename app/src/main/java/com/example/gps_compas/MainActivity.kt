@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import android.widget.ImageView
+import androidx.annotation.RequiresPermission
 
 class MainActivity : AppCompatActivity() {
 
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startLocationUpdates() {
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
