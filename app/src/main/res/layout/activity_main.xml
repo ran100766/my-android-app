@@ -1,91 +1,101 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:padding="16dp"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    android:padding="16dp">
 
+    <!-- Your main content can stay in a vertical LinearLayout -->
+    <LinearLayout
+        android:id="@+id/mainContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvFooter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Speed -->
-    <TextView
-        android:id="@+id/tvSpeed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed: 0 knots"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/holo_red_dark"
-        android:layout_marginBottom="8dp" />
+        <!-- Speed -->
+        <TextView
+            android:id="@+id/tvSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speed: 0 knots"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
 
-    <!-- Direction -->
-    <TextView
-        android:id="@+id/tvDirection"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Direction: 0°"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="8dp" />
+        <!-- Direction -->
+        <TextView
+            android:id="@+id/tvDirection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Direction: 0°"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
 
-    <!-- Latitude -->
-    <TextView
-        android:id="@+id/tvLatitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Lat: 0.00000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="4dp" />
+        <!-- Latitude -->
+        <TextView
+            android:id="@+id/tvLatitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lat: 0.00000"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
 
-    <!-- Longitude -->
-    <TextView
-        android:id="@+id/tvLongitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Lng: 0.00000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="16dp" />
+        <!-- Longitude -->
+        <TextView
+            android:id="@+id/tvLongitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lng: 0.00000"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp" />
 
+        <!-- Compass with arrow -->
+        <FrameLayout
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center">
 
-    <!-- Compass in center -->
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="20dp">
+            <ImageView
+                android:id="@+id/compassBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/compass_circle"
+                android:scaleType="fitCenter" />
 
-        <!-- Compass background -->
-        <ImageView
-            android:id="@+id/compassBackground"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:src="@drawable/compass_circle"
-            android:scaleType="fitCenter"/>
+            <ImageView
+                android:id="@+id/directionArrow"
+                android:layout_width="80dp"
+                android:layout_height="200dp"
+                android:src="@drawable/arrow"
+                app:tint="@android:color/holo_blue_dark"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </LinearLayout>
 
-        <ImageView
-            android:id="@+id/directionArrow"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/arrow"
-            android:layout_gravity="center"
-            android:rotation="0"/>
-    </FrameLayout>
-
-
+    <!-- Footer pinned to bottom -->
     <TextView
         android:id="@+id/tvFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Implemented by : Ran Teshuva"
+        android:text="Implemented by: Ran Teshuva"
         android:textSize="14sp"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center" />
 
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
