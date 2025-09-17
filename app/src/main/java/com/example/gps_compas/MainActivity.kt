@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -115,6 +116,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onResume() {
         super.onResume()
         startLocationUpdates()
