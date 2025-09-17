@@ -23,7 +23,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvSpeed: TextView
     private lateinit var tvDirection: TextView
-    private lateinit var tvCoords: TextView
+    private lateinit var tvLatitude: TextView
+    private lateinit var tvLongitude: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,8 @@ class MainActivity : AppCompatActivity() {
 
         tvSpeed = findViewById(R.id.tvSpeed)
         tvDirection = findViewById(R.id.tvDirection)
-        tvCoords = findViewById(R.id.tvCoords)
+        tvLatitude = findViewById(R.id.tvLatitude)
+        tvLongitude = findViewById(R.id.tvLongitude)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -87,7 +90,10 @@ class MainActivity : AppCompatActivity() {
 
         tvSpeed.text = "Speed: %.1f knots".format( speedKnots)
         tvDirection.text = "Direction: %.0f°".format(location.bearing)
-        tvCoords.text = "Lat: %.5f, Lng: %.5f".format(location.latitude, location.longitude)
+//        tvCoords.text = "Lat: %.5f, Lng: %.5f".format(location.latitude, location.longitude)
+
+        tvLatitude.text = "Lat: %.5f".format(location.latitude)
+        tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
         val arrow = findViewById<ImageView>(R.id.directionArrow)
         arrow.rotation = location.bearing   // or azimuth

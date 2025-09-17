@@ -7,30 +7,51 @@
     android:padding="16dp"
     android:keepScreenOn="true">
 
-    <!-- Top info: speed, direction, coords -->
+
+    <!-- Speed -->
     <TextView
         android:id="@+id/tvSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Speed: 0.0 knots"
-        android:textSize="18sp"
-        android:padding="4dp"/>
+        android:text="Speed: 0 knots"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/holo_red_dark"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Direction -->
     <TextView
         android:id="@+id/tvDirection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Direction: 0°"
-        android:textSize="18sp"
-        android:padding="4dp"/>
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Latitude -->
     <TextView
-        android:id="@+id/tvCoords"
+        android:id="@+id/tvLatitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lat: 0.00000, Lng: 0.00000"
-        android:textSize="16sp"
-        android:padding="4dp"/>
+        android:text="Lat: 0.00000"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Longitude -->
+    <TextView
+        android:id="@+id/tvLongitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lng: 0.00000"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp" />
+
 
     <!-- Compass in center -->
     <FrameLayout
