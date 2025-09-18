@@ -1,7 +1,9 @@
 package com.example.gpscompass
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.widget.TextView
@@ -11,9 +13,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import android.widget.ImageView
 import androidx.annotation.RequiresPermission
-import android.os.Handler
-import android.os.Looper
-import android.view.WindowManager
+import android.view.animation.LinearInterpolator
+import com.example.gps_compas.AzimuthMarkerView
+import com.example.gps_compas.Marker
 
 class MainActivity : AppCompatActivity() {
 
@@ -95,8 +97,48 @@ class MainActivity : AppCompatActivity() {
         tvLatitude.text = "Lat: %.5f".format(location.latitude)
         tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
+
         val arrow = findViewById<ImageView>(R.id.directionArrow)
-        arrow.rotation = location.bearing   // or azimuth
+        val animator = ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
+        animator.duration = 300  // milliseconds
+        animator.interpolator = LinearInterpolator()
+        animator.start()
+
+
+
+        val latJ = 31.7795   // Jerusalem
+        val lonJ = 35.2339
+
+        val latH = 32.17094   // Home
+        val lonH = 34.83833
+
+        val (distanceJ, bearingJ) = calculateDistanceAndBearing(location.latitude, location.longitude, latJ, lonJ)
+
+//        println("Distance: %.2f km".format(distanceJ / 1000)) // in kilometers
+//        println("Bearing: %.1f°".format(bearingJ))
+
+        val markerJ = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+
+        val atJerusalem = distanceJ < 100f
+
+        val (distanceH, bearingH) = calculateDistanceAndBearing(location.latitude, location.longitude, latH, lonH)
+//        println("Distance: %.2f km".format(distanceH / 1000)) // in kilometers
+//        println("Bearing: %.1f°".format(bearingH))
+
+
+        val markerH = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+
+        val atHome = distanceH < 100f
+
+        val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+
+        val markers = listOf(
+            Marker(azimuth = bearingJ, color = Color.parseColor("#673AB7"), radius = 100f, drawAtCenter = atJerusalem),  // in the middle
+            Marker(azimuth = bearingH, color = Color.GREEN, radius = 100f, drawAtCenter = atHome)   // on circumference
+        )
+
+        markerView.setMarkers(markers)
+
     }
 
 
@@ -127,4 +169,23 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         startLocationUpdates()
     }
+
+
+    fun calculateDistanceAndBearing(
+        lat1: Double, lon1: Double,
+        lat2: Double, lon2: Double
+    ): Pair<Float, Float> {
+        val results = FloatArray(2)
+
+        // Compute distance (in meters) and initial bearing (in degrees)
+        Location.distanceBetween(lat1, lon1, lat2, lon2, results)
+
+        val distance = results[0]   // meters
+        val bearing = results[1]    // degrees from north
+
+        return Pair(distance, bearing)
+    }
+
+
+
 }

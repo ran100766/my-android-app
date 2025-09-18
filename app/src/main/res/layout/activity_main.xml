@@ -73,7 +73,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/compass_circle"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"/>
+
+            <com.example.gps_compas.AzimuthMarkerView
+                android:id="@+id/azimuthMarker"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
             <ImageView
                 android:id="@+id/directionArrow"
