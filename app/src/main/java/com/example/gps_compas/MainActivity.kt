@@ -14,14 +14,18 @@ import com.google.android.gms.location.*
 import android.widget.ImageView
 import androidx.annotation.RequiresPermission
 import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import com.example.gps_compas.AzimuthMarkerView
 import com.example.gps_compas.Marker
-
+import android.view.animation.Animation
 class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+
+    private var currentDegree = 0f  // <-- declare here
+
 
     private lateinit var tvSpeed: TextView
     private lateinit var tvDirection: TextView
@@ -98,36 +102,64 @@ class MainActivity : AppCompatActivity() {
         tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
 
-        val arrow = findViewById<ImageView>(R.id.directionArrow)
-        val animator = ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
-        animator.duration = 300  // milliseconds
-        animator.interpolator = LinearInterpolator()
-        animator.start()
-
-
-
         val latJ = 31.7795   // Jerusalem
         val lonJ = 35.2339
 
         val latH = 32.17094   // Home
         val lonH = 34.83833
 
-        val (distanceJ, bearingJ) = calculateDistanceAndBearing(location.latitude, location.longitude, latJ, lonJ)
+        var (distanceJ, bearingJ) = calculateDistanceAndBearing(location.latitude, location.longitude, latJ, lonJ)
 
 //        println("Distance: %.2f km".format(distanceJ / 1000)) // in kilometers
 //        println("Bearing: %.1f°".format(bearingJ))
 
-        val markerJ = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
-
-        val atJerusalem = distanceJ < 100f
-
-        val (distanceH, bearingH) = calculateDistanceAndBearing(location.latitude, location.longitude, latH, lonH)
+        var (distanceH, bearingH) = calculateDistanceAndBearing(location.latitude, location.longitude, latH, lonH)
 //        println("Distance: %.2f km".format(distanceH / 1000)) // in kilometers
 //        println("Bearing: %.1f°".format(bearingH))
 
 
-        val markerH = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
+
+        val arrowStatic = false
+
+        if (arrowStatic)
+        {
+            val arrow = findViewById<ImageView>(R.id.directionArrow)
+            val animator = ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
+            animator.duration = 300  // milliseconds
+            animator.interpolator = LinearInterpolator()
+            animator.start()
+        }
+        else
+        {
+            val compassBackground = findViewById<ImageView>(R.id.compassBackground)
+
+            val rotateAnimation = RotateAnimation(
+                currentDegree,
+                -location.bearing,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+            )
+            rotateAnimation.duration = 500   // smoother transition
+            rotateAnimation.fillAfter = true
+
+            compassBackground.startAnimation(rotateAnimation)
+
+            currentDegree = -location.bearing
+
+            bearingJ = bearingJ - location.bearing
+            if (bearingJ < 0) {
+                bearingJ += 360f
+            }
+            bearingH = bearingH - location.bearing
+            if (bearingH < 0) {
+                bearingH += 360f
+            }
+        }
+
+
+
+        val atJerusalem = distanceJ < 100f
         val atHome = distanceH < 100f
 
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
@@ -140,8 +172,6 @@ class MainActivity : AppCompatActivity() {
         markerView.setMarkers(markers)
 
     }
-
-
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onRequestPermissionsResult(
