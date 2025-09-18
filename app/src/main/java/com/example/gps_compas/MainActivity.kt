@@ -165,8 +165,8 @@ class MainActivity : AppCompatActivity() {
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
         val markers = listOf(
-            Marker(azimuth = bearingJ, color = Color.parseColor("#673AB7"), radius = 100f, drawAtCenter = atJerusalem),  // in the middle
-            Marker(azimuth = bearingH, color = Color.GREEN, radius = 100f, drawAtCenter = atHome)   // on circumference
+            Marker(azimuth = bearingJ, color = Color.parseColor("#673AB7"), radius = 100f, drawAtCenter = atJerusalem, distanceJ.toInt()),  // in the middle
+            Marker(azimuth = bearingH, color = Color.GREEN, radius = 100f, drawAtCenter = atHome, distanceH.toInt())   // on circumference
         )
 
         markerView.setMarkers(markers)

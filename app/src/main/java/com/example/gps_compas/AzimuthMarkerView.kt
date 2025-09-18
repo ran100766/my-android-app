@@ -1,5 +1,6 @@
 package com.example.gps_compas
 
+import android.R
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -13,7 +14,8 @@ data class Marker(
     val azimuth: Float = 0f,
     val color: Int = Color.MAGENTA,
     val radius: Float = 30f,
-    val drawAtCenter: Boolean = false
+    val drawAtCenter: Boolean = false,
+    val distance :Int = 0
 )
 
 class AzimuthMarkerView @JvmOverloads constructor(
@@ -51,6 +53,20 @@ class AzimuthMarkerView @JvmOverloads constructor(
             }
 
             canvas.drawCircle(x, y, m.radius, paint)
+
+
+
+
+
+            // ✅ Draw the distance text inside
+            paint.color = Color.WHITE
+            paint.style = Paint.Style.FILL
+            paint.textAlign = Paint.Align.CENTER
+            paint.textSize = 40f  // adjust size as needed
+
+            val distanceText = String.format("%d m", m.distance) // example: "49.8 m"
+            canvas.drawText(distanceText, x, y + (paint.textSize / 3), paint)
+
         }
     }
 }
