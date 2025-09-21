@@ -59,7 +59,7 @@ class AzimuthMarkerView @JvmOverloads constructor(
 
 
             // ✅ Draw the distance text inside
-            paint.color = Color.WHITE
+            paint.color = Color.BLACK
             paint.style = Paint.Style.FILL
             paint.textAlign = Paint.Align.CENTER
             paint.textSize = 40f  // adjust size as needed

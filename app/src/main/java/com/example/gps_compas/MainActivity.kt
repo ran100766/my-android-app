@@ -108,14 +108,12 @@ class MainActivity : AppCompatActivity() {
         val latH = 32.17094   // Home
         val lonH = 34.83833
 
+        val latM = 32.16580   // Marina
+        val lonM = 34.79267
+
         var (distanceJ, bearingJ) = calculateDistanceAndBearing(location.latitude, location.longitude, latJ, lonJ)
-
-//        println("Distance: %.2f km".format(distanceJ / 1000)) // in kilometers
-//        println("Bearing: %.1f°".format(bearingJ))
-
         var (distanceH, bearingH) = calculateDistanceAndBearing(location.latitude, location.longitude, latH, lonH)
-//        println("Distance: %.2f km".format(distanceH / 1000)) // in kilometers
-//        println("Bearing: %.1f°".format(bearingH))
+        var (distanceM, bearingM) = calculateDistanceAndBearing(location.latitude, location.longitude, latM, lonM)
 
 
 
@@ -155,20 +153,27 @@ class MainActivity : AppCompatActivity() {
             if (bearingH < 0) {
                 bearingH += 360f
             }
+
+            bearingM = bearingM - location.bearing
+            if (bearingM < 0) {
+                bearingM += 360f
+            }
+
         }
 
 
 
         val atJerusalem = distanceJ < 100f
         val atHome = distanceH < 100f
+        val atMarina = distanceM < 100f
 
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
         val markers = listOf(
-            Marker(azimuth = bearingJ, color = Color.parseColor("#673AB7"), radius = 100f, drawAtCenter = atJerusalem, distanceJ.toInt()),  // in the middle
-            Marker(azimuth = bearingH, color = Color.GREEN, radius = 100f, drawAtCenter = atHome, distanceH.toInt())   // on circumference
+            Marker(azimuth = bearingJ, color = Color.parseColor("#D1C4E9"), radius = 100f, drawAtCenter = atJerusalem, distanceJ.toInt()),  // in the middle
+            Marker(azimuth = bearingH, color = Color.parseColor("#81C784"), radius = 100f, drawAtCenter = atHome, distanceH.toInt()),   // on circumference
+            Marker(azimuth = bearingM, color = Color.parseColor("#81D4FA"), radius = 100f, drawAtCenter = atMarina, distanceM.toInt())
         )
-
         markerView.setMarkers(markers)
 
     }
