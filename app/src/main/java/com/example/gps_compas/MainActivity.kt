@@ -16,6 +16,7 @@ import androidx.annotation.RequiresPermission
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import com.example.gps_compas.AzimuthMarkerView
+import com.example.gps_compas.MarkerConfig
 import com.example.gps_compas.Marker
 import android.view.animation.Animation
 class MainActivity : AppCompatActivity() {
@@ -37,13 +38,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
 
-//// Keep screen on
-//        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-//
-//// Remove after 5 minutes
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-//        }, 5 * 60 * 1000)
 
         tvSpeed = findViewById(R.id.tvSpeed)
         tvDirection = findViewById(R.id.tvDirection)
@@ -102,20 +96,38 @@ class MainActivity : AppCompatActivity() {
         tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
 
-        val latJ = 31.7795   // Jerusalem
-        val lonJ = 35.2339
+        // Step 1: define your reference locations
+        data class ReferencePoint(
+            val name: String,
+            val lat: Double,
+            val lon: Double
+        )
 
-        val latH = 32.17094   // Home
-        val lonH = 34.83833
+        // Step 2: define a result holder
+        data class NavigationResult(
+            var point: ReferencePoint,
+            var distance: Float,
+            var bearing: Float,
+            var atPoint: Boolean = false
+        )
 
-        val latM = 32.16580   // Marina
-        val lonM = 34.79267
+// Step 3: put your reference points in a list
+        val referencePoints = listOf(
+            ReferencePoint("Jerusalem", 31.7795, 35.2339),
+            ReferencePoint("Home", 32.17094, 34.83833),
+            ReferencePoint("Marina", 32.16580, 34.79267)
+        )
 
-        var (distanceJ, bearingJ) = calculateDistanceAndBearing(location.latitude, location.longitude, latJ, lonJ)
-        var (distanceH, bearingH) = calculateDistanceAndBearing(location.latitude, location.longitude, latH, lonH)
-        var (distanceM, bearingM) = calculateDistanceAndBearing(location.latitude, location.longitude, latM, lonM)
-
-
+// Step 4: calculate and store results
+        val results = referencePoints.map { point ->
+            val (distance, bearing) = calculateDistanceAndBearing(
+                location.latitude,
+                location.longitude,
+                point.lat,
+                point.lon
+            )
+            NavigationResult(point, distance, bearing, distance  < 10F)
+        }
 
 
         val arrowStatic = false
@@ -145,37 +157,33 @@ class MainActivity : AppCompatActivity() {
 
             currentDegree = -location.bearing
 
-            bearingJ = bearingJ - location.bearing
-            if (bearingJ < 0) {
-                bearingJ += 360f
-            }
-            bearingH = bearingH - location.bearing
-            if (bearingH < 0) {
-                bearingH += 360f
-            }
 
-            bearingM = bearingM - location.bearing
-            if (bearingM < 0) {
-                bearingM += 360f
+            for (r in results) {
+                r.bearing = r.bearing - location.bearing
+                if (r.bearing < 0) {
+                    r.bearing += 360f
+                }
             }
 
         }
 
 
-
-        val atJerusalem = distanceJ < 100f
-        val atHome = distanceH < 100f
-        val atMarina = distanceM < 100f
-
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+        
+// Build markers list from results
+        val markers = results.map { r ->
+//            println("${r.point.name}: distance=${r.distance}, bearing=${r.bearing}")
 
-        val markers = listOf(
-            Marker(azimuth = bearingJ, color = Color.parseColor("#D1C4E9"), radius = 100f, drawAtCenter = atJerusalem, distanceJ.toInt()),  // in the middle
-            Marker(azimuth = bearingH, color = Color.parseColor("#81C784"), radius = 100f, drawAtCenter = atHome, distanceH.toInt()),   // on circumference
-            Marker(azimuth = bearingM, color = Color.parseColor("#81D4FA"), radius = 100f, drawAtCenter = atMarina, distanceM.toInt())
-        )
+            Marker(
+                azimuth = r.bearing.toFloat(),
+                color = MarkerConfig.colors[r.point.name] ?: Color.BLACK, // fallback color
+                radius = 100f,
+                drawAtCenter = r.atPoint ?: false,
+                distance = r.distance.toInt()
+            )
+        }
+
         markerView.setMarkers(markers)
-
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -196,8 +204,6 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
-
-
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onResume() {
