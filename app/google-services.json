@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "672132771945",
+    "project_id": "my-radar-c45f1",
+    "storage_bucket": "my-radar-c45f1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672132771945:android:3f7d13abc40b73c64cf2f8",
+        "android_client_info": {
+          "package_name": "com.example.gpscompass"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlaIDGXIBIwtICmSKBfYSKXJ6GghaIVq0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

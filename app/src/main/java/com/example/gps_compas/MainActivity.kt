@@ -196,19 +196,17 @@ class MainActivity : AppCompatActivity() {
 
 
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
-        
-// Build markers list from results
-        val markers = results.map { r ->
-//            println("${r.point.name}: distance=${r.distance}, bearing=${r.bearing}")
 
+        val markers = results.mapIndexed { index, r ->
             Marker(
-                azimuth = r.bearing.toFloat(),
-                color = MarkerConfig.colors[r.point.name] ?: Color.BLACK, // fallback color
+                azimuth = r.bearing,
+                color = MarkerConfig.colors[index % MarkerConfig.colors.size], // safe wrapping
                 radius = 100f,
-                drawAtCenter = r.atPoint ?: false,
+                drawAtCenter = r.atPoint,
                 distance = r.distance.toInt()
             )
         }
+
 
         markerView.setMarkers(markers)
     }
