@@ -11,56 +11,56 @@
         android:id="@+id/mainContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
         android:gravity="center_horizontal"
-        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/tvFooter"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <!-- Speed -->
         <TextView
             android:id="@+id/tvSpeed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Speed: 0 knots"
-            android:textSize="28sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp" />
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
         <!-- Direction -->
         <TextView
             android:id="@+id/tvDirection"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Direction: 0°"
-            android:textSize="28sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp" />
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
         <!-- Latitude -->
         <TextView
             android:id="@+id/tvLatitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
             android:text="Lat: 0.00000"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp" />
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <!-- Longitude -->
         <TextView
             android:id="@+id/tvLongitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Lng: 0.00000"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="16dp" />
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <!-- Compass with arrow -->
         <FrameLayout
@@ -72,8 +72,8 @@
                 android:id="@+id/compassBackground"
                 android:layout_width="300dp"
                 android:layout_height="300dp"
-                android:src="@drawable/compass_circle"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/compass_circle" />
 
             <com.example.gps_compas.AzimuthMarkerView
                 android:id="@+id/azimuthMarker"
@@ -84,24 +84,37 @@
                 android:id="@+id/directionArrow"
                 android:layout_width="80dp"
                 android:layout_height="150dp"
-                android:src="@drawable/arrow"
-                app:tint="@android:color/holo_blue_dark"
+                android:layout_gravity="center"
                 android:scaleType="fitXY"
-                android:layout_gravity="center" />
+                android:src="@drawable/arrow"
+                app:tint="@android:color/holo_blue_dark" />
         </FrameLayout>
     </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tvPoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/tvFooter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Footer pinned to bottom -->
     <TextView
         android:id="@+id/tvFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
         android:text="Implemented by: Ran Teshuva"
         android:textSize="14sp"
-        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:gravity="center" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

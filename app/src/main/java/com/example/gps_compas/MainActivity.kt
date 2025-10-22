@@ -22,6 +22,7 @@ import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
+import android.widget.LinearLayout
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 
@@ -42,11 +43,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
 
+    data class NavigationResult(
+        var point: ReferencePoint,
+        var distance: Float,
+        var bearing: Float,
+        var atPoint: Boolean = false
+    )
+
     private var referencePoints: MutableList<ReferencePoint> = mutableListOf(
 //        ReferencePoint("Jerusalem", 31.7795, 35.2339),
 //        ReferencePoint("Home", 32.17094, 34.83833),
 //        ReferencePoint("Marina", 32.16580, 34.79267)
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
@@ -115,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         val speedKmh = speedMps * 3.6
         val speedKnots = speedMps * 1.94384
 
-        tvSpeed.text = "Speed: %.1f knots".format( speedKnots)
+        tvSpeed.text = "Speed: %.1f knots".format(speedKnots)
         tvDirection.text = "Direction: %.0f°".format(location.bearing)
 //        tvCoords.text = "Lat: %.5f, Lng: %.5f".format(location.latitude, location.longitude)
 
@@ -131,12 +140,7 @@ class MainActivity : AppCompatActivity() {
 //        )
 
         // Step 2: define a result holder
-        data class NavigationResult(
-            var point: ReferencePoint,
-            var distance: Float,
-            var bearing: Float,
-            var atPoint: Boolean = false
-        )
+
 
 // Step 3: put your reference points in a list
 //        val referencePoints = listOf(
@@ -153,22 +157,20 @@ class MainActivity : AppCompatActivity() {
                 point.lat,
                 point.lon
             )
-            NavigationResult(point, distance, bearing, distance  < 10F)
+            NavigationResult(point, distance, bearing, distance < 10F)
         }
 
 
         val arrowStatic = false
 
-        if (arrowStatic)
-        {
+        if (arrowStatic) {
             val arrow = findViewById<ImageView>(R.id.directionArrow)
-            val animator = ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
+            val animator =
+                ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
             animator.duration = 300  // milliseconds
             animator.interpolator = LinearInterpolator()
             animator.start()
-        }
-        else
-        {
+        } else {
             val compassBackground = findViewById<ImageView>(R.id.compassBackground)
 
             val rotateAnimation = RotateAnimation(
@@ -207,8 +209,9 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-
         markerView.setMarkers(markers)
+
+        showPointsList(results)
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -251,5 +254,19 @@ class MainActivity : AppCompatActivity() {
 
         return Pair(distance, bearing)
     }
+
+    fun showPointsList(results: List<NavigationResult>) {
+        val tvPoints = findViewById<TextView>(R.id.tvPoints)
+        tvPoints.textSize = 24f  // <- increase this value for bigger fonts
+
+        val sb = StringBuilder()
+        for (point in results) {
+            sb.append(getString(R.string.point_info, point.point.name, point.distance))
+            sb.append("\n")
+        }
+        tvPoints.text = sb.toString()
+
+    }
+
 
 }

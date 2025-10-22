@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GPS_COMPAS</string>
+    <string name="point_info">%1$s: %2$.1f m</string>
 </resources>
