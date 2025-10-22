@@ -22,6 +22,8 @@ import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
+import com.example.gps_compas.FirestoreManager
+import com.example.gps_compas.ReferencePoint
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -86,8 +88,9 @@ class MainActivity : AppCompatActivity() {
 
         FirebaseApp.initializeApp(this)
 
+        val firestoreManager = FirestoreManager()
 
-        readAllLocations { points ->
+        firestoreManager.readAllLocations { points ->
             // This block runs after Firestore data is loaded
             if (points.isNotEmpty()) {
                 // Assign to a variable for later use
@@ -107,11 +110,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    data class ReferencePoint(
-        val name: String,
-        val lat: Double,
-        val lon: Double
-    )
     private fun updateUI(location: Location) {
         val speedMps = location.speed
         val speedKmh = speedMps * 3.6
@@ -254,37 +252,6 @@ class MainActivity : AppCompatActivity() {
         val bearing = results[1]    // degrees from north
 
         return Pair(distance, bearing)
-    }
-
-    private fun readAllLocations(onResult: (List<ReferencePoint>) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("locations")
-            .get()
-            .addOnSuccessListener { documents ->
-//                var referencePoints = mutableListOf<ReferencePoint>()
-                referencePoints.clear()
-
-                for (doc in documents) {
-                    val name = doc.id
-                    val latitude = doc.getDouble("latitude")
-                    val longitude = doc.getDouble("longitude")
-
-                    Log.d("Firestore", "Document: $name, Latitude: $latitude, Longitude: $longitude")
-
-
-                    if (latitude != null && longitude != null) {
-                        referencePoints.add(ReferencePoint(name, latitude, longitude))
-                    }
-                }
-
-                // return list through callback
-                onResult(referencePoints)
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error reading locations", e)
-                onResult(emptyList()) // return empty list on failure
-            }
     }
 
 }
