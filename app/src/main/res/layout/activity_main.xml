@@ -92,18 +92,16 @@
     </LinearLayout>
 
 
-    <TextView
-        android:id="@+id/tvPoints"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/pointsContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:orientation="vertical"
         android:padding="8dp"
-        android:textColor="#000000"
-        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@id/tvFooter"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        />
     <!-- Footer pinned to bottom -->
     <TextView
         android:id="@+id/tvFooter"

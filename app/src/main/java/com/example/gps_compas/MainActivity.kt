@@ -255,18 +255,31 @@ class MainActivity : AppCompatActivity() {
         return Pair(distance, bearing)
     }
 
+    //    fun showPointsList(results: List<NavigationResult>) {
+//        val tvPoints = findViewById<TextView>(R.id.tvPoints)
+//        tvPoints.textSize = 24f  // <- increase this value for bigger fonts
+//
+//        val sb = StringBuilder()
+//        for (point in results) {
+//            sb.append(getString(R.string.point_info, point.point.name, point.distance))
+//            sb.append("\n")
+//        }
+//        tvPoints.text = sb.toString()
+//
+//    }
     fun showPointsList(results: List<NavigationResult>) {
-        val tvPoints = findViewById<TextView>(R.id.tvPoints)
-        tvPoints.textSize = 24f  // <- increase this value for bigger fonts
 
-        val sb = StringBuilder()
-        for (point in results) {
-            sb.append(getString(R.string.point_info, point.point.name, point.distance))
-            sb.append("\n")
+        val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
+        pointsContainer.removeAllViews()
+
+        for ((index, point) in results.withIndex()) {
+            val tv = TextView(this)
+            tv.textSize = 24f
+            tv.text = getString(R.string.point_info, point.point.name, point.distance)
+            tv.setPadding(16, 16, 16, 16)
+            // Set background color, cycling through list if more points than colors
+            tv.setBackgroundColor(MarkerConfig.colors[index % MarkerConfig.colors.size])
+            pointsContainer.addView(tv)
         }
-        tvPoints.text = sb.toString()
-
     }
-
-
 }
