@@ -4,8 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 //    id("androidx.compose.compiler") // <-- required for Kotlin 2.0+
     id("org.jetbrains.kotlin.plugin.compose")  // <-- Compose Compiler plugin
-
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -66,4 +65,14 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5") // JUnit 4 support for Android tests
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1") // UI testing
+
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("org.json:json:20230618")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-common-ktx")
+
+
 }

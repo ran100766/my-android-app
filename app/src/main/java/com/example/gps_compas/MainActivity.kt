@@ -19,8 +19,15 @@ import com.example.gps_compas.AzimuthMarkerView
 import com.example.gps_compas.MarkerConfig
 import com.example.gps_compas.Marker
 import android.view.animation.Animation
-class MainActivity : AppCompatActivity() {
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Log
 
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+
+class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -33,7 +40,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
 
-
+    private var referencePoints: MutableList<ReferencePoint> = mutableListOf(
+//        ReferencePoint("Jerusalem", 31.7795, 35.2339),
+//        ReferencePoint("Home", 32.17094, 34.83833),
+//        ReferencePoint("Marina", 32.16580, 34.79267)
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
@@ -72,6 +83,19 @@ class MainActivity : AppCompatActivity() {
         } else {
             startLocationUpdates()
         }
+
+        FirebaseApp.initializeApp(this)
+
+
+        readAllLocations { points ->
+            // This block runs after Firestore data is loaded
+            if (points.isNotEmpty()) {
+                // Assign to a variable for later use
+                referencePoints = points.toMutableList()
+
+                // Use referencePoints here, e.g., update UI or show on map
+            }
+        }
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -83,6 +107,11 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    data class ReferencePoint(
+        val name: String,
+        val lat: Double,
+        val lon: Double
+    )
     private fun updateUI(location: Location) {
         val speedMps = location.speed
         val speedKmh = speedMps * 3.6
@@ -97,11 +126,11 @@ class MainActivity : AppCompatActivity() {
 
 
         // Step 1: define your reference locations
-        data class ReferencePoint(
-            val name: String,
-            val lat: Double,
-            val lon: Double
-        )
+//        data class ReferencePoint(
+//            val name: String,
+//            val lat: Double,
+//            val lon: Double
+//        )
 
         // Step 2: define a result holder
         data class NavigationResult(
@@ -112,11 +141,11 @@ class MainActivity : AppCompatActivity() {
         )
 
 // Step 3: put your reference points in a list
-        val referencePoints = listOf(
-            ReferencePoint("Jerusalem", 31.7795, 35.2339),
-            ReferencePoint("Home", 32.17094, 34.83833),
-            ReferencePoint("Marina", 32.16580, 34.79267)
-        )
+//        val referencePoints = listOf(
+//            ReferencePoint("Jerusalem", 31.7795, 35.2339),
+//            ReferencePoint("Home", 32.17094, 34.83833),
+//            ReferencePoint("Marina", 32.16580, 34.79267)
+//        )
 
 // Step 4: calculate and store results
         val results = referencePoints.map { point ->
@@ -227,6 +256,35 @@ class MainActivity : AppCompatActivity() {
         return Pair(distance, bearing)
     }
 
+    private fun readAllLocations(onResult: (List<ReferencePoint>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
 
+        db.collection("locations")
+            .get()
+            .addOnSuccessListener { documents ->
+//                var referencePoints = mutableListOf<ReferencePoint>()
+                referencePoints.clear()
+
+                for (doc in documents) {
+                    val name = doc.id
+                    val latitude = doc.getDouble("latitude")
+                    val longitude = doc.getDouble("longitude")
+
+                    Log.d("Firestore", "Document: $name, Latitude: $latitude, Longitude: $longitude")
+
+
+                    if (latitude != null && longitude != null) {
+                        referencePoints.add(ReferencePoint(name, latitude, longitude))
+                    }
+                }
+
+                // return list through callback
+                onResult(referencePoints)
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error reading locations", e)
+                onResult(emptyList()) // return empty list on failure
+            }
+    }
 
 }
