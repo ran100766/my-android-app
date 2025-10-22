@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.ObjectAnimator
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.Typeface
 import android.location.Location
 import android.os.Bundle
 import android.widget.TextView
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private var referencePoints: MutableList<ReferencePoint> = mutableListOf(
 //        ReferencePoint("Jerusalem", 31.7795, 35.2339),
-//        ReferencePoint("Home", 32.17094, 34.83833),
+//        ReferencePoint("Home", 32.17062, 34.83878),
 //        ReferencePoint("Marina", 32.16580, 34.79267)
     )
 
@@ -131,24 +132,6 @@ class MainActivity : AppCompatActivity() {
         tvLatitude.text = "Lat: %.5f".format(location.latitude)
         tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
-
-        // Step 1: define your reference locations
-//        data class ReferencePoint(
-//            val name: String,
-//            val lat: Double,
-//            val lon: Double
-//        )
-
-        // Step 2: define a result holder
-
-
-// Step 3: put your reference points in a list
-//        val referencePoints = listOf(
-//            ReferencePoint("Jerusalem", 31.7795, 35.2339),
-//            ReferencePoint("Home", 32.17094, 34.83833),
-//            ReferencePoint("Marina", 32.16580, 34.79267)
-//        )
-
 // Step 4: calculate and store results
         val results = referencePoints.map { point ->
             val (distance, bearing) = calculateDistanceAndBearing(
@@ -200,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
         val markers = results.mapIndexed { index, r ->
+
             Marker(
                 azimuth = r.bearing,
                 color = MarkerConfig.colors[index % MarkerConfig.colors.size], // safe wrapping
@@ -207,6 +191,7 @@ class MainActivity : AppCompatActivity() {
                 drawAtCenter = r.atPoint,
                 distance = r.distance.toInt()
             )
+
         }
 
         markerView.setMarkers(markers)
@@ -275,6 +260,7 @@ class MainActivity : AppCompatActivity() {
         for ((index, point) in results.withIndex()) {
             val tv = TextView(this)
             tv.textSize = 24f
+            tv.setTypeface(null, Typeface.BOLD) // 👈 makes the text bold
             tv.text = getString(R.string.point_info, point.point.name, point.distance)
             tv.setPadding(16, 16, 16, 16)
             // Set background color, cycling through list if more points than colors
