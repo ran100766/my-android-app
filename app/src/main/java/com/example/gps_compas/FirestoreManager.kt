@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 
 class FirestoreManager {
+    private val db = FirebaseFirestore.getInstance()
 
     fun readAllLocations(onResult: (List<ReferencePoint>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
@@ -30,6 +31,25 @@ class FirestoreManager {
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error reading locations", e)
                 onResult(emptyList())
+            }
+    }
+
+    fun writeLocation(point: ReferencePoint, onComplete: (Boolean) -> Unit) {
+        val data = mapOf(
+            "latitude" to point.lat,
+            "longitude" to point.lon
+        )
+
+        db.collection("locations")
+            .document(point.name)
+            .set(data)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Wrote location: ${point.name}")
+                onComplete(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error writing location", e)
+                onComplete(false)
             }
     }
 }

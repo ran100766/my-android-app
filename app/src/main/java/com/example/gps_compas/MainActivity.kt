@@ -30,6 +30,7 @@ import com.example.gps_compas.ReferencePoint
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -43,6 +44,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDirection: TextView
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
+
+    private var previousLatitude: Double = 90.0
+
+    private var previousLongitude: Double = 180.0
+
 
     data class NavigationResult(
         var point: ReferencePoint,
@@ -97,18 +103,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         FirebaseApp.initializeApp(this)
-
-        val firestoreManager = FirestoreManager()
-
-        firestoreManager.readAllLocations { points ->
-            // This block runs after Firestore data is loaded
-            if (points.isNotEmpty()) {
-                // Assign to a variable for later use
-                referencePoints = points.toMutableList()
-
-                // Use referencePoints here, e.g., update UI or show on map
-            }
-        }
+//
+//        val firestoreManager = FirestoreManager()
+//
+//        firestoreManager.readAllLocations { points ->
+//            // This block runs after Firestore data is loaded
+//            if (points.isNotEmpty()) {
+//                // Assign to a variable for later use
+//                referencePoints = points.toMutableList()
+//
+//                // Use referencePoints here, e.g., update UI or show on map
+//            }
+//        }
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -132,7 +138,41 @@ class MainActivity : AppCompatActivity() {
         tvLatitude.text = "Lat: %.5f".format(location.latitude)
         tvLongitude.text = "Lng: %.5f".format(location.longitude)
 
-// Step 4: calculate and store results
+
+        val firestoreManager = FirestoreManager()
+
+        firestoreManager.readAllLocations { points ->
+            // This block runs after Firestore data is loaded
+            if (points.isNotEmpty()) {
+                // Assign to a variable for later use
+                referencePoints = points.toMutableList()
+
+                // Use referencePoints here, e.g., update UI or show on map
+            }
+        }
+
+
+        val distance = calculateDistanceAndBearing(
+            location.latitude,
+            location.longitude,
+            previousLatitude,
+            previousLongitude
+        ).first
+
+        Log.d("DistanceCheck", "Distance: $distance meters")
+
+        val xxx = "RanT"
+        if (abs(distance) < 5.0) {
+            val myLocation = ReferencePoint(xxx, location.latitude, location.longitude)
+            firestoreManager.writeLocation(myLocation) { success ->
+                if (success) Log.d("Main", "Location saved!")
+            }
+            Log.d("Firestore", "Document write: $xxx, Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+
+        }
+        previousLatitude = location.latitude
+        previousLongitude = location.longitude
+
         val results = referencePoints.map { point ->
             val (distance, bearing) = calculateDistanceAndBearing(
                 location.latitude,
