@@ -3,7 +3,6 @@ package com.example.gpscompass
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.Typeface
 import android.location.Location
 import android.os.Bundle
@@ -21,18 +20,18 @@ import com.example.gps_compas.MarkerConfig
 import com.example.gps_compas.Marker
 import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
 import android.widget.LinearLayout
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
+import com.example.gps_compas.askUserName
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
+
+    private var userName: String = "No Name"  // Variable to store the name
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -103,19 +102,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         FirebaseApp.initializeApp(this)
-//
-//        val firestoreManager = FirestoreManager()
-//
-//        firestoreManager.readAllLocations { points ->
-//            // This block runs after Firestore data is loaded
-//            if (points.isNotEmpty()) {
-//                // Assign to a variable for later use
-//                referencePoints = points.toMutableList()
-//
-//                // Use referencePoints here, e.g., update UI or show on map
-//            }
-//        }
-    }
+
+
+        askUserName(this) { name ->
+            userName = name
+            // You can continue using userName here
+        }    }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startLocationUpdates() {
@@ -161,13 +153,13 @@ class MainActivity : AppCompatActivity() {
 
         Log.d("DistanceCheck", "Distance: $distance meters")
 
-        val xxx = "RanT"
+//        val xxx = "RanT"
         if (abs(distance) < 5.0) {
-            val myLocation = ReferencePoint(xxx, location.latitude, location.longitude)
+            val myLocation = ReferencePoint(userName, location.latitude, location.longitude)
             firestoreManager.writeLocation(myLocation) { success ->
                 if (success) Log.d("Main", "Location saved!")
             }
-            Log.d("Firestore", "Document write: $xxx, Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+            Log.d("Firestore", "Document write: $userName, Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
         }
         previousLatitude = location.latitude
