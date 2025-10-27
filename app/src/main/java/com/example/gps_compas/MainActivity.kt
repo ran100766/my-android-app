@@ -25,6 +25,7 @@ import android.widget.LinearLayout
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
+import com.google.firebase.firestore.FirebaseFirestore
 
 import kotlin.math.abs
 
@@ -116,6 +117,16 @@ class MainActivity : AppCompatActivity() {
             locationCallback,
             mainLooper
         )
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d("Firestore", "Trying to delete: $userName")
+
+        FirestoreManager().deleteLocation(userName) { success ->
+            Log.d("Firestore", "Delete success = $success")
+        }
     }
 
     private fun updateUI(location: Location) {
@@ -272,18 +283,6 @@ class MainActivity : AppCompatActivity() {
         return Pair(distance, bearing)
     }
 
-    //    fun showPointsList(results: List<NavigationResult>) {
-//        val tvPoints = findViewById<TextView>(R.id.tvPoints)
-//        tvPoints.textSize = 24f  // <- increase this value for bigger fonts
-//
-//        val sb = StringBuilder()
-//        for (point in results) {
-//            sb.append(getString(R.string.point_info, point.point.name, point.distance))
-//            sb.append("\n")
-//        }
-//        tvPoints.text = sb.toString()
-//
-//    }
     fun showPointsList(results: List<NavigationResult>) {
 
         val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)

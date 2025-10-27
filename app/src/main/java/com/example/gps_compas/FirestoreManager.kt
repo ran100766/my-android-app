@@ -52,4 +52,20 @@ class FirestoreManager {
                 onComplete(false)
             }
     }
+
+    fun deleteLocation(userName: String, onComplete: (Boolean) -> Unit) {
+
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("locations").document(userName)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("Firestore", "Document successfully deleted!")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error deleting document", e)
+            }
+    }
+
+
 }
