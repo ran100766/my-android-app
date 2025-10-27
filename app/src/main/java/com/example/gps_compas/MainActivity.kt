@@ -119,15 +119,15 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    override fun onStop() {
-        super.onStop()
-
-        Log.d("Firestore", "Trying to delete: $userName")
-
-        FirestoreManager().deleteLocation(userName) { success ->
-            Log.d("Firestore", "Delete success = $success")
-        }
-    }
+//    override fun onStop() {
+//        super.onStop()
+//
+//        Log.d("Firestore", "Trying to delete: $userName")
+//
+//        FirestoreManager().deleteLocation(userName) { success ->
+//            Log.d("Firestore", "Delete success = $success")
+//        }
+//    }
 
     private fun updateUI(location: Location) {
         val speedMps = location.speed
