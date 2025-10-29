@@ -2,6 +2,7 @@ package com.example.gpscompass
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.location.Location
@@ -20,19 +21,17 @@ import com.example.gps_compas.MarkerConfig
 import com.example.gps_compas.Marker
 import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
-import android.util.Log
 import android.widget.LinearLayout
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
-import com.google.firebase.firestore.FirebaseFirestore
-
-import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
 
-    private var userName: String = "No Name"  // Variable to store the name
-
+    companion object {
+        val noName = "No_Name"
+        var userName: String = noName
+    }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -108,7 +107,17 @@ class MainActivity : AppCompatActivity() {
         askUserName(this) { name ->
             userName = name
             // You can continue using userName here
-        }    }
+        }
+
+        val serviceIntent = Intent(this, LocationService::class.java)
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+
+    }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startLocationUpdates() {
@@ -119,15 +128,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-//    override fun onStop() {
-//        super.onStop()
-//
-//        Log.d("Firestore", "Trying to delete: $userName")
-//
-//        FirestoreManager().deleteLocation(userName) { success ->
-//            Log.d("Firestore", "Delete success = $success")
-//        }
-//    }
 
     private fun updateUI(location: Location) {
         val speedMps = location.speed
@@ -154,30 +154,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        val distance = calculateDistanceAndBearing(
-            location.latitude,
-            location.longitude,
-            previousLatitude,
-            previousLongitude
-        ).first
-
-        Log.d("DistanceCheck", "Distance: $distance meters")
-
-//        val xxx = "RanT"
-        if (abs(distance) < 5.0) {
-            val myLocation = ReferencePoint(userName, location.latitude, location.longitude)
-            firestoreManager.writeLocation(myLocation) { success ->
-                if (success) Log.d("Main", "Location saved!")
-            }
-            Log.d("Firestore", "Document write: $userName, Latitude: ${location.latitude}, Longitude: ${location.longitude}")
-
-        }
-        previousLatitude = location.latitude
-        previousLongitude = location.longitude
-
         val results = referencePoints.map { point ->
-            val (distance, bearing) = calculateDistanceAndBearing(
+            val (distance, bearing) = CalculateDistance.calculateDistanceAndBearing(
                 location.latitude,
                 location.longitude,
                 point.lat,
@@ -265,22 +243,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startLocationUpdates()
-    }
-
-
-    fun calculateDistanceAndBearing(
-        lat1: Double, lon1: Double,
-        lat2: Double, lon2: Double
-    ): Pair<Float, Float> {
-        val results = FloatArray(2)
-
-        // Compute distance (in meters) and initial bearing (in degrees)
-        Location.distanceBetween(lat1, lon1, lat2, lon2, results)
-
-        val distance = results[0]   // meters
-        val bearing = results[1]    // degrees from north
-
-        return Pair(distance, bearing)
     }
 
     fun showPointsList(results: List<NavigationResult>) {
