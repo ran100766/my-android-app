@@ -25,6 +25,8 @@ import android.widget.LinearLayout
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -258,10 +260,25 @@ class MainActivity : AppCompatActivity() {
         pointsContainer.removeAllViews()
 
         for ((index, point) in results.withIndex()) {
+            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
+            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
             val tv = TextView(this)
-            tv.textSize = 24f
+            tv.textSize = 12f
             tv.setTypeface(null, Typeface.BOLD) // 👈 makes the text bold
-            tv.text = getString(R.string.point_info, point.point.name, point.distance)
+
+//
+//            tv.text = getString(
+//                R.string.point_info,
+//                point.point.name,
+//                point.distance.toInt(),
+//                lastUpdateStr)
+
+            // Fixed-width columns
+            val text = String.format("%-12s %-7d %-20s", point.point.name.take(11), point.distance.toInt(), lastUpdateStr)
+            tv.text = text
+            tv.typeface = Typeface.MONOSPACE // ensures columns align
+
+
             tv.setPadding(16, 16, 16, 16)
             // Set background color, cycling through list if more points than colors
             tv.setBackgroundColor(MarkerConfig.colors[index % MarkerConfig.colors.size])

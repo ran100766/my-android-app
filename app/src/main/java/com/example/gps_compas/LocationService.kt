@@ -19,6 +19,7 @@ import com.example.gps_compas.FirestoreManager
 import com.example.gpscompass.CalculateDistance.calculateDistanceAndBearing
 import com.example.gpscompass.MainActivity.Companion.noName
 import com.example.gpscompass.MainActivity.Companion.userName
+import com.google.firebase.Timestamp
 import kotlin.math.abs
 
 class LocationService : Service() {
@@ -75,7 +76,7 @@ class LocationService : Service() {
                 Log.d("DistanceCheck", "Distance: $distance meters")
 
                 if (abs(distance) > 2.0 && userName != noName) {
-                    val myLocation = ReferencePoint(userName, location.latitude, location.longitude)
+                    val myLocation = ReferencePoint(userName, location.latitude, location.longitude, Timestamp.now().toDate(),false,listOf<String>() )
                     FirestoreManager().writeLocation(myLocation) { success ->
                         if (success) Log.d("Main", "Location saved!")
                     }

@@ -2,6 +2,7 @@ package com.example.gps_compas  // <-- use your actual package name
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
 
 class FirestoreManager {
     private val db = FirebaseFirestore.getInstance()
@@ -19,10 +20,23 @@ class FirestoreManager {
                     val latitude = doc.getDouble("latitude")
                     val longitude = doc.getDouble("longitude")
 
-                    Log.d("Firestore", "Document: $name, Latitude: $latitude, Longitude: $longitude")
+// Read lastUpdate timestamp
+                    val lastUpdate = doc.getTimestamp("lastUpdate")?.toDate() // converts to java.util.Date
+
+// Read requestUpdate boolean
+                    val requestUpdate = doc.getBoolean("requestUpdate") ?: false
+
+// Read requestFrom array
+                    val requestFrom = doc.get("requestFrom") as? List<String> ?: emptyList()
+
+                    Log.d(
+                        "Firestore",
+                        "Document: $name, Latitude: $latitude, Longitude: $longitude, " +
+                                "LastUpdate: $lastUpdate, RequestUpdate: $requestUpdate, RequestFrom: $requestFrom"
+                    )
 
                     if (latitude != null && longitude != null) {
-                        referencePoints.add(ReferencePoint(name, latitude, longitude))
+                        referencePoints.add(ReferencePoint(name, latitude, longitude, lastUpdate, requestUpdate, requestFrom))
                     }
                 }
 
@@ -35,9 +49,12 @@ class FirestoreManager {
     }
 
     fun writeLocation(point: ReferencePoint, onComplete: (Boolean) -> Unit) {
-        val data = mapOf(
+        val data = hashMapOf(
             "latitude" to point.lat,
-            "longitude" to point.lon
+            "longitude" to point.lon,
+            "lastUpdate" to Timestamp.now(),          // current server timestamp
+            "requestUpdate" to false,                 // boolean field
+            "requestFrom" to listOf<String>()        // empty array
         )
 
         db.collection("locations")
