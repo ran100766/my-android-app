@@ -38,8 +38,8 @@ class LocationService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-            10_000L // ⏱ every 10 seconds
+            Priority.PRIORITY_HIGH_ACCURACY,
+            2_000L // ⏱ every 10 seconds
         ).build()
 
         createNotificationChannel()
@@ -74,6 +74,8 @@ class LocationService : Service() {
                 ).first
 
                 Log.d("DistanceCheck", "Distance: $distance meters")
+
+                createNotification("RRRR...")
 
                 if (abs(distance) > 2.0 && userName != noName) {
                     val myLocation = ReferencePoint(userName, location.latitude, location.longitude, Timestamp.now().toDate(),false,listOf<String>() )

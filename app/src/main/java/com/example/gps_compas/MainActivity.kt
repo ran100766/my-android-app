@@ -2,11 +2,16 @@ package com.example.gpscompass
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.location.Location
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -125,6 +130,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             startService(serviceIntent)
         }
+
+        requestIgnoreBatteryOptimizations()
 
     }
 
@@ -283,6 +290,19 @@ class MainActivity : AppCompatActivity() {
             // Set background color, cycling through list if more points than colors
             tv.setBackgroundColor(MarkerConfig.colors[index % MarkerConfig.colors.size])
             pointsContainer.addView(tv)
+        }
+    }
+
+    private fun requestIgnoreBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val packageName = packageName
+
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
         }
     }
 }
