@@ -42,7 +42,7 @@ class LocationService : Service() {
 
         locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            2_000L // ⏱ every 10 seconds
+            10_000L
         ).build()
 
         createNotificationChannel()

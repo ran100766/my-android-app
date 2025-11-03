@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Schedule next update in 2 seconds
-            uiUpdateHandler.postDelayed(this, 2000)
+            uiUpdateHandler.postDelayed(this, 5000)
         }
     }
     data class NavigationResult(
