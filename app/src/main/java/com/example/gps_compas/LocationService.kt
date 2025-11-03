@@ -123,4 +123,21 @@ class LocationService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+
+        // Stop location updates
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+
+        // Stop foreground service
+        stopForeground(true)
+        stopSelf()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startLocationUpdates() // call the function
+        return START_NOT_STICKY // <-- here, return type is Int, correct
+    }
+
 }
