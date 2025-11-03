@@ -10,6 +10,8 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.TextView
@@ -27,6 +29,8 @@ import com.example.gps_compas.Marker
 import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
@@ -39,23 +43,29 @@ class MainActivity : AppCompatActivity() {
         val noName = "No_Name"
         var userName: String = noName
     }
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
 
     private var currentDegree = 0f  // <-- declare here
-
 
     private lateinit var tvSpeed: TextView
     private lateinit var tvDirection: TextView
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
 
-    private var previousLatitude: Double = 90.0
 
-    private var previousLongitude: Double = 180.0
+    private val uiUpdateHandler = Handler(Looper.getMainLooper())
 
+    private val uiUpdateRunnable = object : Runnable {
+        override fun run() {
+            // Read latest location from service
+            val location = LocationService.latestLocation
+            location?.let {
+                updateUI(location)
+            }
 
+            // Schedule next update in 2 seconds
+            uiUpdateHandler.postDelayed(this, 2000)
+        }
+    }
     data class NavigationResult(
         var point: ReferencePoint,
         var distance: Float,
@@ -69,6 +79,33 @@ class MainActivity : AppCompatActivity() {
 //        ReferencePoint("Marina", 32.16580, 34.79267)
     )
 
+    private val locationPermissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    private val locationPermissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (fineGranted || coarseGranted) {
+                // ✅ Permission granted → start the location service
+                startLocationService()
+            } else {
+                Toast.makeText(this, "Location permission is required", Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private fun startLocationService() {
+        val serviceIntent = Intent(this, LocationService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
@@ -78,33 +115,6 @@ class MainActivity : AppCompatActivity() {
         tvDirection = findViewById(R.id.tvDirection)
         tvLatitude = findViewById(R.id.tvLatitude)
         tvLongitude = findViewById(R.id.tvLongitude)
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, 2000L
-        ).build()
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
-                locationResult.lastLocation?.let { location -> updateUI(location)}
-            }
-        }
-
-        // Request location permission
-        if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1
-            )
-        } else {
-            startLocationUpdates()
-        }
 
         FirebaseApp.initializeApp(this)
 
@@ -123,27 +133,9 @@ class MainActivity : AppCompatActivity() {
             userName = savedName
         }
 
-        val serviceIntent = Intent(this, LocationService::class.java)
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
-
+        locationPermissionRequest.launch(locationPermissions)
         requestIgnoreBatteryOptimizations()
-
     }
-
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun startLocationUpdates() {
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            mainLooper
-        )
-    }
-
 
     private fun updateUI(location: Location) {
         val speedMps = location.speed
@@ -236,29 +228,14 @@ class MainActivity : AppCompatActivity() {
         showPointsList(results)
     }
 
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1 && grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
-            startLocationUpdates()
-        }
+    override fun onStart() {
+        super.onStart()
+        uiUpdateHandler.post(uiUpdateRunnable) // start periodic updates
     }
 
-    override fun onPause() {
-        super.onPause()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override fun onResume() {
-        super.onResume()
-        startLocationUpdates()
+    override fun onStop() {
+        super.onStop()
+        uiUpdateHandler.removeCallbacks(uiUpdateRunnable) // stop updates when activity stops
     }
 
     fun showPointsList(results: List<NavigationResult>) {
@@ -273,12 +250,6 @@ class MainActivity : AppCompatActivity() {
             tv.textSize = 12f
             tv.setTypeface(null, Typeface.BOLD) // 👈 makes the text bold
 
-//
-//            tv.text = getString(
-//                R.string.point_info,
-//                point.point.name,
-//                point.distance.toInt(),
-//                lastUpdateStr)
 
             // Fixed-width columns
             val text = String.format("%-12s %-7d %-20s", point.point.name.take(11), point.distance.toInt(), lastUpdateStr)

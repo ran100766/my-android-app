@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -24,13 +25,15 @@ import kotlin.math.abs
 
 class LocationService : Service() {
 
+    companion object {
+        var latestLocation: Location = Location("custom").apply {
+            latitude = 90.0
+            longitude = 180.0
+        }
+    }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private val db = FirebaseFirestore.getInstance()
-
-    private var previousLatitude: Double = 90.0
-
-    private var previousLongitude: Double = 180.0
 
     override fun onCreate() {
         super.onCreate()
@@ -69,13 +72,11 @@ class LocationService : Service() {
                 val distance = calculateDistanceAndBearing(
                     location.latitude,
                     location.longitude,
-                    previousLatitude,
-                    previousLongitude
+                    latestLocation.latitude,
+                    latestLocation.longitude
                 ).first
 
                 Log.d("DistanceCheck", "Distance: $distance meters")
-
-                createNotification("RRRR...")
 
                 if (abs(distance) > 2.0 && userName != noName) {
                     val myLocation = ReferencePoint(userName, location.latitude, location.longitude, Timestamp.now().toDate(),false,listOf<String>() )
@@ -88,9 +89,7 @@ class LocationService : Service() {
                     )
 
                 }
-                previousLatitude = location.latitude
-                previousLongitude = location.longitude
-
+                latestLocation = location
             }
         }
     }
