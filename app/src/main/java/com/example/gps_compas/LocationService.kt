@@ -43,7 +43,10 @@ class LocationService : Service() {
         locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             10_000L
-        ).build()
+        )
+            .setMinUpdateDistanceMeters(5f) // 🔹 only if moved 2 meters
+            .setMinUpdateIntervalMillis(5_000L) // don’t trigger faster than 5 sec
+            .build()
 
         createNotificationChannel()
         startForeground(1, createNotification("Tracking location..."))
@@ -78,7 +81,7 @@ class LocationService : Service() {
 
                 Log.d("DistanceCheck", "Distance: $distance meters")
 
-                if (abs(distance) > 2.0 && userName != noName) {
+                if (/*abs(distance) > 2.0 && */userName != noName) {
                     val myLocation = ReferencePoint(userName, location.latitude, location.longitude, Timestamp.now().toDate(),false,listOf<String>() )
                     FirestoreManager().writeLocation(myLocation) { success ->
                         if (success) Log.d("Main", "Location saved!")

@@ -244,15 +244,15 @@ class MainActivity : AppCompatActivity() {
         pointsContainer.removeAllViews()
 
         for ((index, point) in results.withIndex()) {
-            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
-            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
+//            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
+//            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
             val tv = TextView(this)
-            tv.textSize = 12f
+            tv.textSize = 20f
             tv.setTypeface(null, Typeface.BOLD) // 👈 makes the text bold
 
 
             // Fixed-width columns
-            val text = String.format("%-12s %-7d %-20s", point.point.name.take(11), point.distance.toInt(), lastUpdateStr)
+            val text = String.format("%-14s %-7d", point.point.name.take(11), point.distance.toInt())
             tv.text = text
             tv.typeface = Typeface.MONOSPACE // ensures columns align
 
