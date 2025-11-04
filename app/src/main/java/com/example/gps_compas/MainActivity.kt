@@ -14,6 +14,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,6 +30,7 @@ import com.example.gps_compas.Marker
 import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.gps_compas.FirestoreManager
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
 
+    private val visibleLines = mutableListOf<String>() // 👈 store currently visible lines
 
     private val uiUpdateHandler = Handler(Looper.getMainLooper())
 
@@ -66,6 +69,7 @@ class MainActivity : AppCompatActivity() {
             uiUpdateHandler.postDelayed(this, 5000)
         }
     }
+
     data class NavigationResult(
         var point: ReferencePoint,
         var distance: Float,
@@ -106,6 +110,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 🧩 helper function to update visible lines
+    private fun updateVisibleLines(scrollView: ScrollView, container: LinearLayout) {
+        val scrollY = scrollView.scrollY
+        val scrollHeight = scrollView.height
+
+        visibleLines.clear()
+
+        for (i in 0 until container.childCount) {
+            val child = container.getChildAt(i)
+            val childTop = child.top
+            val childBottom = child.bottom
+
+            if (childBottom > scrollY && childTop < scrollY + scrollHeight) {
+                val tv = child as TextView
+                visibleLines.add(tv.text.toString())
+            }
+        }
+
+        // Example: show in log or use in other parts of app
+        Log.d("VisibleLines", "Currently visible: $visibleLines")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
@@ -135,7 +161,17 @@ class MainActivity : AppCompatActivity() {
 
         locationPermissionRequest.launch(locationPermissions)
         requestIgnoreBatteryOptimizations()
+
+
+        val scrollView = findViewById<ScrollView>(R.id.scrollView)
+        val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
+
+// Add a scroll listener
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            updateVisibleLines(scrollView, pointsContainer)
+        }
     }
+
 
     private fun updateUI(location: Location) {
         val speedMps = location.speed
@@ -226,6 +262,7 @@ class MainActivity : AppCompatActivity() {
         markerView.setMarkers(markers)
 
         showPointsList(results)
+
     }
 
     override fun onStart() {
@@ -252,7 +289,8 @@ class MainActivity : AppCompatActivity() {
 
 
             // Fixed-width columns
-            val text = String.format("%-14s %-7d", point.point.name.take(14), point.distance.toInt())
+            val text =
+                String.format("%-14s %-7d", point.point.name.take(14), point.distance.toInt())
             tv.text = text
             tv.typeface = Typeface.MONOSPACE // ensures columns align
 
