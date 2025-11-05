@@ -77,7 +77,8 @@ class MainActivity : AppCompatActivity() {
         var point: ReferencePoint,
         var distance: Float,
         var bearing: Float,
-        var atPoint: Boolean = false
+        var atPoint: Boolean = false,
+        var index: Int = 0
     )
 
     private var referencePoints: MutableList<ReferencePoint> = mutableListOf(
@@ -213,6 +214,9 @@ class MainActivity : AppCompatActivity() {
             )
             NavigationResult(point, distance, bearing, distance < 10F)
         }.sortedBy { it.distance }
+            .onEachIndexed { index, result ->
+                result.index = index
+            }
 
 
         showPointsList(results)
@@ -267,10 +271,10 @@ class MainActivity : AppCompatActivity() {
                 visibleLines.any { line -> line.contains(r.point.name.take(14)) }
             }
             .sortedBy { it.distance } // sort ascending by distance
-            .mapIndexed { index, r ->
+            .map {r ->
                 Marker(
                     azimuth = r.bearing,
-                    color = MarkerConfig.colors[index % MarkerConfig.colors.size], // safe wrapping
+                    color = MarkerConfig.colors[r.index % MarkerConfig.colors.size], // safe wrapping
                     radius = 100f,
                     drawAtCenter = r.atPoint,
                     distance = r.distance.toInt()
@@ -295,7 +299,7 @@ class MainActivity : AppCompatActivity() {
         val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
         pointsContainer.removeAllViews()
 
-        for ((index, point) in results.withIndex()) {
+        for ( point in results) {
 //            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
 //            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
             val tv = TextView(this)
@@ -312,7 +316,7 @@ class MainActivity : AppCompatActivity() {
 
             tv.setPadding(16, 16, 16, 16)
             // Set background color, cycling through list if more points than colors
-            tv.setBackgroundColor(MarkerConfig.colors[index % MarkerConfig.colors.size])
+            tv.setBackgroundColor(MarkerConfig.colors[point.index % MarkerConfig.colors.size])
             pointsContainer.addView(tv)
         }
     }
