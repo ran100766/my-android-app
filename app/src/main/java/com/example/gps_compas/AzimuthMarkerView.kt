@@ -37,6 +37,7 @@ class AzimuthMarkerView @JvmOverloads constructor(
         val centerY = height / 2f
         val radius = (width.coerceAtMost(height) / 2f) - 40f
 
+        var index = 0;
         for (m in markers) {
             val paint = Paint().apply {
                 color = m.color
@@ -47,9 +48,10 @@ class AzimuthMarkerView @JvmOverloads constructor(
             val (x, y) = if (m.drawAtCenter) {
                 centerX to centerY
             } else {
+                var diffRadius = radius * (((10 - markers.size + 1) + index).toFloat() / 10f)
                 val rad = Math.toRadians(m.azimuth.toDouble())
-                centerX + radius * sin(rad).toFloat() to
-                        centerY - radius * cos(rad).toFloat()
+                centerX + diffRadius * sin(rad).toFloat() to
+                        centerY - diffRadius  * cos(rad).toFloat()
             }
 
             canvas.drawCircle(x, y, m.radius, paint)
@@ -67,6 +69,7 @@ class AzimuthMarkerView @JvmOverloads constructor(
             val distanceText = String.format("%d m", m.distance) // example: "49.8 m"
             canvas.drawText(distanceText, x, y + (paint.textSize / 3), paint)
 
+            index++
         }
     }
 }

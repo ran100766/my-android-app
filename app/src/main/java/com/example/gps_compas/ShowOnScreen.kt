@@ -73,7 +73,7 @@ import com.example.gpscompass.R
                         color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
                         radius = 100f,
                         drawAtCenter = r.atPoint,
-                        distance = r.distance.toInt()
+                        distance = (r.distance * 1).toInt()
                     )
                 }
         } else {
@@ -89,7 +89,7 @@ import com.example.gpscompass.R
                         color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
                         radius = 100f,
                         drawAtCenter = r.atPoint,
-                        distance = r.distance.toInt()
+                        distance = (r.distance * 1).toInt()
                     )
                 }
         }
