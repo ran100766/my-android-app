@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         // Example: show in log or use in other parts of app
         Log.d("VisibleLines", "Currently visible: $visibleLines")
 
-        showCompasPoints(fullLocationsList, latestLocation)
+        showPointsOnCompas(fullLocationsList, latestLocation)
 
     }
 
@@ -212,8 +212,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         showCompasArrow(fullLocationsList, location)
-        showPointsList(fullLocationsList)
-        showCompasPoints(fullLocationsList, location)
+        showPointsOnList(fullLocationsList)
+        showPointsOnCompas(fullLocationsList, location)
 
     }
 
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCompasPoints(fullLocationsList: List<NavigationResult>, location: Location)
+    private fun showPointsOnCompas(fullLocationsList: List<NavigationResult>, location: Location)
     {
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity() {
         uiUpdateHandler.removeCallbacks(uiUpdateRunnable) // stop updates when activity stops
     }
 
-    fun showPointsList(fullLocationsList: List<NavigationResult>) {
+    fun showPointsOnList(fullLocationsList: List<NavigationResult>) {
 
         val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
         pointsContainer.removeAllViews()
