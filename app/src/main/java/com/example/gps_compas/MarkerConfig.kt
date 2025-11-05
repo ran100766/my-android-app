@@ -12,12 +12,14 @@ object MarkerConfig {
     val colors = listOf(
         Color.parseColor("#D1C4E9"), // light purple
         Color.parseColor("#81C784"), // light green
+        Color.parseColor("#FFBCAAA4"), // brown
         Color.parseColor("#81D4FA"), // light blue
         Color.parseColor("#FFF59D"), // light yellow
         Color.parseColor("#FFAB91"), // peach
-        Color.parseColor("#A5D6A7"), // mint green
-        Color.parseColor("#B3E5FC"), // sky blue
-        Color.parseColor("#C5E1A5")  // olive green
+
+//        Color.parseColor("#A5D6A7"), // mint green
+//        Color.parseColor("#B3E5FC"), // sky blue
+//        Color.parseColor("#C5E1A5")  // olive green
     )
 
 }

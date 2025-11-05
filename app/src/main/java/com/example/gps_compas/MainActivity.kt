@@ -36,6 +36,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
+import com.example.gpscompass.LocationService.Companion.latestLocation
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         val noName = "No_Name"
         var userName: String = noName
     }
+
+    private var results: List<NavigationResult> = emptyList()
 
     private var currentDegree = 0f  // <-- declare here
 
@@ -130,6 +133,9 @@ class MainActivity : AppCompatActivity() {
 
         // Example: show in log or use in other parts of app
         Log.d("VisibleLines", "Currently visible: $visibleLines")
+
+        showMarkers(results, latestLocation)
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -198,7 +204,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val results = referencePoints.map { point ->
+        results = referencePoints.map { point ->
             val (distance, bearing) = CalculateDistance.calculateDistanceAndBearing(
                 location.latitude,
                 location.longitude,
@@ -206,8 +212,16 @@ class MainActivity : AppCompatActivity() {
                 point.lon
             )
             NavigationResult(point, distance, bearing, distance < 10F)
-        }
+        }.sortedBy { it.distance }
 
+
+        showPointsList(results)
+        showMarkers(results, location)
+
+    }
+
+    private fun showMarkers(results: List<NavigationResult>, location: Location)
+    {
 
         val arrowStatic = false
 
@@ -247,22 +261,23 @@ class MainActivity : AppCompatActivity() {
 
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
-        val markers = results.mapIndexed { index, r ->
-
-            Marker(
-                azimuth = r.bearing,
-                color = MarkerConfig.colors[index % MarkerConfig.colors.size], // safe wrapping
-                radius = 100f,
-                drawAtCenter = r.atPoint,
-                distance = r.distance.toInt()
-            )
-
-        }
+        val markers = results
+            .filter { r ->
+                // Only include if point.name is in visibleLines
+                visibleLines.any { line -> line.contains(r.point.name.take(14)) }
+            }
+            .sortedBy { it.distance } // sort ascending by distance
+            .mapIndexed { index, r ->
+                Marker(
+                    azimuth = r.bearing,
+                    color = MarkerConfig.colors[index % MarkerConfig.colors.size], // safe wrapping
+                    radius = 100f,
+                    drawAtCenter = r.atPoint,
+                    distance = r.distance.toInt()
+                )
+            }
 
         markerView.setMarkers(markers)
-
-        showPointsList(results)
-
     }
 
     override fun onStart() {
