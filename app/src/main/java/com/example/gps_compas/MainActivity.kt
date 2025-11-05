@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         // Example: show in log or use in other parts of app
         Log.d("VisibleLines", "Currently visible: $visibleLines")
 
-        showMarkers(fullLocationsList, latestLocation)
+        showCompasPoints(fullLocationsList, latestLocation)
 
     }
 
@@ -211,15 +211,14 @@ class MainActivity : AppCompatActivity() {
                 result.index = index
             }
 
-
+        showCompasArrow(fullLocationsList, location)
         showPointsList(fullLocationsList)
-        showMarkers(fullLocationsList, location)
+        showCompasPoints(fullLocationsList, location)
 
     }
 
-    private fun showMarkers(fullLocationsList: List<NavigationResult>, location: Location)
+    private fun showCompasArrow(fullLocationsList: List<NavigationResult>, location: Location)
     {
-
         val arrowStatic = false
 
         if (arrowStatic) {
@@ -254,25 +253,43 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
 
-
+    private fun showCompasPoints(fullLocationsList: List<NavigationResult>, location: Location)
+    {
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
-        val visibleLocationsList = fullLocationsList
-            .filter { r ->
-                // Only include if point.name is in visibleLines
-                visibleLines.any { line -> line.contains(r.point.name.take(14)) }
-            }
-            .sortedBy { it.distance } // sort ascending by distance
-            .map {r ->
-                Marker(
-                    azimuth = r.bearing,
-                    color = MarkerConfig.colors[r.index % MarkerConfig.colors.size], // safe wrapping
-                    radius = 100f,
-                    drawAtCenter = r.atPoint,
-                    distance = r.distance.toInt()
-                )
-            }
+        val visibleLocationsList = if (visibleLines.isEmpty()) {
+            // If no lines are visible yet, take the first 5 from the full list
+            fullLocationsList
+                .sortedBy { it.distance }
+                .take(5)
+                .map { r ->
+                    Marker(
+                        azimuth = r.bearing,
+                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
+                        radius = 100f,
+                        drawAtCenter = r.atPoint,
+                        distance = r.distance.toInt()
+                    )
+                }
+        } else {
+            // Otherwise, filter by visible lines
+            fullLocationsList
+                .filter { r ->
+                    visibleLines.any { line -> line.contains(r.point.name.take(14)) }
+                }
+                .sortedBy { it.distance }
+                .map { r ->
+                    Marker(
+                        azimuth = r.bearing,
+                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
+                        radius = 100f,
+                        drawAtCenter = r.atPoint,
+                        distance = r.distance.toInt()
+                    )
+                }
+        }
 
         markerView.setMarkers(visibleLocationsList)
     }
