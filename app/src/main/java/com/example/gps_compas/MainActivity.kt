@@ -31,7 +31,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
-import com.example.gpscompass.LocationService.Companion.latestLocation
+import com.example.gps_compas.showCompasArrow
+import com.example.gps_compas.showPointsOnCompas
+import com.example.gps_compas.showPointsOnList
+import com.example.gps_compas.updateVisibleLines
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,17 +43,12 @@ class MainActivity : AppCompatActivity() {
         var userName: String = noName
     }
 
-    private var fullLocationsList: List<NavigationResult> = emptyList()
-
-    private var currentDegree = 0f  // <-- declare here
+    public var fullLocationsList: List<NavigationResult> = emptyList()
 
     private lateinit var tvSpeed: TextView
     private lateinit var tvDirection: TextView
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
-
-    private val visibleLines = mutableListOf<String>() // 👈 store currently visible lines
-
     private val uiUpdateHandler = Handler(Looper.getMainLooper())
 
     private val uiUpdateRunnable = object : Runnable {
@@ -106,32 +104,6 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
     }
-
-    // 🧩 helper function to update visible lines
-    private fun updateVisibleLines(scrollView: ScrollView, container: LinearLayout) {
-        val scrollY = scrollView.scrollY
-        val scrollHeight = scrollView.height
-
-        visibleLines.clear()
-
-        for (i in 0 until container.childCount) {
-            val child = container.getChildAt(i)
-            val childTop = child.top
-            val childBottom = child.bottom
-
-            if (childBottom > scrollY && childTop < scrollY + scrollHeight) {
-                val tv = child as TextView
-                visibleLines.add(tv.text.toString())
-            }
-        }
-
-        // Example: show in log or use in other parts of app
-        Log.d("VisibleLines", "Currently visible: $visibleLines")
-
-        showPointsOnCompas(fullLocationsList, latestLocation)
-
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
@@ -168,7 +140,7 @@ class MainActivity : AppCompatActivity() {
 
 // Add a scroll listener
         scrollView.viewTreeObserver.addOnScrollChangedListener {
-            updateVisibleLines(scrollView, pointsContainer)
+            updateVisibleLines(this , scrollView, pointsContainer , fullLocationsList)
         }
     }
 
@@ -211,87 +183,10 @@ class MainActivity : AppCompatActivity() {
                 result.index = index
             }
 
-        showCompasArrow(fullLocationsList, location)
-        showPointsOnList(fullLocationsList)
-        showPointsOnCompas(fullLocationsList, location)
+        showCompasArrow(this, fullLocationsList, location)
+        showPointsOnList(this,fullLocationsList)
+        showPointsOnCompas(this,fullLocationsList, location)
 
-    }
-
-    private fun showCompasArrow(fullLocationsList: List<NavigationResult>, location: Location)
-    {
-        val arrowStatic = false
-
-        if (arrowStatic) {
-            val arrow = findViewById<ImageView>(R.id.directionArrow)
-            val animator =
-                ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
-            animator.duration = 300  // milliseconds
-            animator.interpolator = LinearInterpolator()
-            animator.start()
-        } else {
-            val compassBackground = findViewById<ImageView>(R.id.compassBackground)
-
-            val rotateAnimation = RotateAnimation(
-                currentDegree,
-                -location.bearing,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            )
-            rotateAnimation.duration = 500   // smoother transition
-            rotateAnimation.fillAfter = true
-
-            compassBackground.startAnimation(rotateAnimation)
-
-            currentDegree = -location.bearing
-
-
-            for (r in fullLocationsList) {
-                r.bearing = r.bearing - location.bearing
-                if (r.bearing < 0) {
-                    r.bearing += 360f
-                }
-            }
-
-        }
-    }
-
-    private fun showPointsOnCompas(fullLocationsList: List<NavigationResult>, location: Location)
-    {
-        val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
-
-        val visibleLocationsList = if (visibleLines.isEmpty()) {
-            // If no lines are visible yet, take the first 5 from the full list
-            fullLocationsList
-                .sortedBy { it.distance }
-                .take(5)
-                .map { r ->
-                    Marker(
-                        azimuth = r.bearing,
-                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
-                        radius = 100f,
-                        drawAtCenter = r.atPoint,
-                        distance = r.distance.toInt()
-                    )
-                }
-        } else {
-            // Otherwise, filter by visible lines
-            fullLocationsList
-                .filter { r ->
-                    visibleLines.any { line -> line.contains(r.point.name.take(14)) }
-                }
-                .sortedBy { it.distance }
-                .map { r ->
-                    Marker(
-                        azimuth = r.bearing,
-                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
-                        radius = 100f,
-                        drawAtCenter = r.atPoint,
-                        distance = r.distance.toInt()
-                    )
-                }
-        }
-
-        markerView.setMarkers(visibleLocationsList)
     }
 
     override fun onStart() {
@@ -302,33 +197,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         uiUpdateHandler.removeCallbacks(uiUpdateRunnable) // stop updates when activity stops
-    }
-
-    fun showPointsOnList(fullLocationsList: List<NavigationResult>) {
-
-        val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
-        pointsContainer.removeAllViews()
-
-        for ( point in fullLocationsList) {
-//            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
-//            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
-            val tv = TextView(this)
-            tv.textSize = 20f
-            tv.setTypeface(null, Typeface.BOLD) // 👈 makes the text bold
-
-
-            // Fixed-width columns
-            val text =
-                String.format("%-14s %-7d", point.point.name.take(14), point.distance.toInt())
-            tv.text = text
-            tv.typeface = Typeface.MONOSPACE // ensures columns align
-
-
-            tv.setPadding(16, 16, 16, 16)
-            // Set background color, cycling through list if more points than colors
-            tv.setBackgroundColor(MarkerConfig.colors[point.index % MarkerConfig.colors.size])
-            pointsContainer.addView(tv)
-        }
     }
 
     private fun requestIgnoreBatteryOptimizations() {
