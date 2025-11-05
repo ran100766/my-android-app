@@ -4,7 +4,6 @@ import android.Manifest
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.location.Location
 import android.net.Uri
@@ -17,11 +16,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.*
 import android.widget.ImageView
-import androidx.annotation.RequiresPermission
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import com.example.gps_compas.AzimuthMarkerView
@@ -37,8 +32,6 @@ import com.example.gps_compas.FirestoreManager
 import com.example.gps_compas.ReferencePoint
 import com.example.gps_compas.askUserName
 import com.example.gpscompass.LocationService.Companion.latestLocation
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         var userName: String = noName
     }
 
-    private var results: List<NavigationResult> = emptyList()
+    private var fullLocationsList: List<NavigationResult> = emptyList()
 
     private var currentDegree = 0f  // <-- declare here
 
@@ -135,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         // Example: show in log or use in other parts of app
         Log.d("VisibleLines", "Currently visible: $visibleLines")
 
-        showMarkers(results, latestLocation)
+        showMarkers(fullLocationsList, latestLocation)
 
     }
 
@@ -205,7 +198,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        results = referencePoints.map { point ->
+        fullLocationsList = referencePoints.map { point ->
             val (distance, bearing) = CalculateDistance.calculateDistanceAndBearing(
                 location.latitude,
                 location.longitude,
@@ -219,12 +212,12 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-        showPointsList(results)
-        showMarkers(results, location)
+        showPointsList(fullLocationsList)
+        showMarkers(fullLocationsList, location)
 
     }
 
-    private fun showMarkers(results: List<NavigationResult>, location: Location)
+    private fun showMarkers(fullLocationsList: List<NavigationResult>, location: Location)
     {
 
         val arrowStatic = false
@@ -253,7 +246,7 @@ class MainActivity : AppCompatActivity() {
             currentDegree = -location.bearing
 
 
-            for (r in results) {
+            for (r in fullLocationsList) {
                 r.bearing = r.bearing - location.bearing
                 if (r.bearing < 0) {
                     r.bearing += 360f
@@ -265,7 +258,7 @@ class MainActivity : AppCompatActivity() {
 
         val markerView = findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
 
-        val markers = results
+        val visibleLocationsList = fullLocationsList
             .filter { r ->
                 // Only include if point.name is in visibleLines
                 visibleLines.any { line -> line.contains(r.point.name.take(14)) }
@@ -281,7 +274,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        markerView.setMarkers(markers)
+        markerView.setMarkers(visibleLocationsList)
     }
 
     override fun onStart() {
@@ -294,12 +287,12 @@ class MainActivity : AppCompatActivity() {
         uiUpdateHandler.removeCallbacks(uiUpdateRunnable) // stop updates when activity stops
     }
 
-    fun showPointsList(results: List<NavigationResult>) {
+    fun showPointsList(fullLocationsList: List<NavigationResult>) {
 
         val pointsContainer = findViewById<LinearLayout>(R.id.pointsContainer)
         pointsContainer.removeAllViews()
 
-        for ( point in results) {
+        for ( point in fullLocationsList) {
 //            val sdf = SimpleDateFormat("dd:MM:yyyy HH:mm:ss", Locale.getDefault())
 //            val lastUpdateStr = point.point.lastUpdate?.let { sdf.format(it) } ?: "N/A"
             val tv = TextView(this)
