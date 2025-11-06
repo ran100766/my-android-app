@@ -1,6 +1,5 @@
 package com.example.gps_compas
 
-import android.R
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -48,10 +47,11 @@ class AzimuthMarkerView @JvmOverloads constructor(
             val (x, y) = if (m.drawAtCenter) {
                 centerX to centerY
             } else {
-                var diffRadius = radius * (((10 - markers.size + 1) + index).toFloat() / 10f)
+//                var differentRadius = radius * (((10 - markers.size + 1) + index).toFloat() / 10f)
+                var differentRadius = radius
                 val rad = Math.toRadians(m.azimuth.toDouble())
-                centerX + diffRadius * sin(rad).toFloat() to
-                        centerY - diffRadius  * cos(rad).toFloat()
+                centerX + differentRadius * sin(rad).toFloat() to
+                        centerY - differentRadius  * cos(rad).toFloat()
             }
 
             canvas.drawCircle(x, y, m.radius, paint)

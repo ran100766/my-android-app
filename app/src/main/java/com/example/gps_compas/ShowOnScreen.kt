@@ -20,14 +20,16 @@ import com.example.gpscompass.R
 
     private var currentDegree = 0f  // <-- declare here
 
-    fun showCompasArrow(activity: Activity, fullLocationsList: List<NavigationResult>, location: Location)
+    fun showCompasArrow(activity: Activity, fullLocationsList: List<NavigationResult>, azimuth: Float, tvDirection : TextView)
     {
         val arrowStatic = false
+
+        tvDirection.text = "Direction: %.0f°".format(azimuth)
 
         if (arrowStatic) {
             val arrow = activity.findViewById<ImageView>(R.id.directionArrow)
             val animator =
-                ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, location.bearing)
+                ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, azimuth)
             animator.duration = 300  // milliseconds
             animator.interpolator = LinearInterpolator()
             animator.start()
@@ -36,7 +38,7 @@ import com.example.gpscompass.R
 
             val rotateAnimation = RotateAnimation(
                 currentDegree,
-                -location.bearing,
+                -azimuth,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f
             )
@@ -45,22 +47,27 @@ import com.example.gpscompass.R
 
             compassBackground.startAnimation(rotateAnimation)
 
-            currentDegree = -location.bearing
+            currentDegree = -azimuth
 
-
-            for (r in fullLocationsList) {
-                r.bearing = r.bearing - location.bearing
-                if (r.bearing < 0) {
-                    r.bearing += 360f
-                }
-            }
+//
+//            for (r in fullLocationsList) {
+//                if (r.newBearing)
+//                {
+//                    r.bearing = r.bearing - azimuth
+//                    if (r.bearing < 0) {
+//                        r.bearing += 360f
+//                    }
+//                    r.newBearing= false
+//                }
+//            }
 
         }
     }
 
-    fun showPointsOnCompas(activity: Activity,fullLocationsList: List<NavigationResult>, location: Location)
+    fun showPointsOnCompas(activity: Activity,fullLocationsList: List<NavigationResult>, azimuth: Float)
     {
         val markerView = activity.findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+        var bearingToDisplay: Float = 0f
 
         val visibleLocationsList = if (visibleLines.isEmpty()) {
             // If no lines are visible yet, take the first 5 from the full list
@@ -68,8 +75,17 @@ import com.example.gpscompass.R
                 .sortedBy { it.distance }
                 .take(5)
                 .map { r ->
+
+
+                    bearingToDisplay = r.bearing - azimuth
+                    if (bearingToDisplay < 0) {
+                        bearingToDisplay += 360f
+                    }
+
+
+
                     Marker(
-                        azimuth = r.bearing,
+                        azimuth = bearingToDisplay,
                         color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
                         radius = 100f,
                         drawAtCenter = r.atPoint,
@@ -84,8 +100,14 @@ import com.example.gpscompass.R
                 }
                 .sortedBy { it.distance }
                 .map { r ->
+
+                    bearingToDisplay = r.bearing - azimuth
+                    if (bearingToDisplay < 0) {
+                        bearingToDisplay += 360f
+                    }
+
                     Marker(
-                        azimuth = r.bearing,
+                        azimuth = bearingToDisplay,
                         color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
                         radius = 100f,
                         drawAtCenter = r.atPoint,
@@ -147,8 +169,6 @@ import com.example.gpscompass.R
 
         // Example: show in log or use in other parts of app
         Log.d("VisibleLines", "Currently visible: $visibleLines")
-
-        showPointsOnCompas(activity, fullLocationsList, latestLocation)
 
     }
 

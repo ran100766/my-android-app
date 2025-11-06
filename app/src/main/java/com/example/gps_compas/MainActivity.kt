@@ -1,5 +1,6 @@
 package com.example.gpscompass
 
+import CompassManager
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.content.Context
@@ -35,7 +36,10 @@ import com.example.gps_compas.showCompasArrow
 import com.example.gps_compas.showPointsOnCompas
 import com.example.gps_compas.showPointsOnList
 import com.example.gps_compas.updateVisibleLines
-
+import com.example.gpscompass.LocationService.Companion.latestLocation
+import kotlinx.coroutines.Job
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.*
 class MainActivity : AppCompatActivity() {
 
     companion object {
@@ -43,10 +47,12 @@ class MainActivity : AppCompatActivity() {
         var userName: String = noName
     }
 
+    private lateinit var compassManager: CompassManager
+
     public var fullLocationsList: List<NavigationResult> = emptyList()
 
     private lateinit var tvSpeed: TextView
-    private lateinit var tvDirection: TextView
+    public lateinit var tvDirection: TextView
     private lateinit var tvLatitude: TextView
     private lateinit var tvLongitude: TextView
     private val uiUpdateHandler = Handler(Looper.getMainLooper())
@@ -69,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         var distance: Float,
         var bearing: Float,
         var atPoint: Boolean = false,
-        var index: Int = 0
+        var index: Int = 0,
     )
 
     private var referencePoints: MutableList<ReferencePoint> = mutableListOf(
@@ -104,9 +110,32 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
     }
+    var smoothedAzimuth = 0f
+    val smoothingFactor = 0.1f  // smaller = smoother
+
+
+    fun smoothAzimuth(oldAzimuth: Float, newAzimuth: Float): Float {
+        var delta = newAzimuth - oldAzimuth
+
+        // Handle wrap-around: keep delta between -180° and +180°
+        if (delta > 180) delta -= 360
+        if (delta < -180) delta += 360
+
+        // Apply low-pass filter
+        val result = (oldAzimuth + smoothingFactor * delta + 360) % 360
+        return result
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
+
+        compassManager = CompassManager(this) { azimuth ->
+            smoothedAzimuth = smoothAzimuth(smoothedAzimuth, azimuth)
+
+            showCompasArrow(this, fullLocationsList, smoothedAzimuth, tvDirection)
+            showPointsOnCompas(this, fullLocationsList, smoothedAzimuth)
+        }
 
 
         tvSpeed = findViewById(R.id.tvSpeed)
@@ -151,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         val speedKnots = speedMps * 1.94384
 
         tvSpeed.text = "Speed: %.1f knots".format(speedKnots)
-        tvDirection.text = "Direction: %.0f°".format(location.bearing)
+//        tvDirection.text = "Direction: %.0f°".format(location.bearing)
 //        tvCoords.text = "Lat: %.5f, Lng: %.5f".format(location.latitude, location.longitude)
 
         tvLatitude.text = "Lat: %.5f".format(location.latitude)
@@ -183,9 +212,10 @@ class MainActivity : AppCompatActivity() {
                 result.index = index
             }
 
-        showCompasArrow(this, fullLocationsList, location)
+//        showCompasArrow(this, fullLocationsList, location)
+//        showPointsOnCompas(this,fullLocationsList, location)
         showPointsOnList(this,fullLocationsList)
-        showPointsOnCompas(this,fullLocationsList, location)
+
 
     }
 
@@ -198,7 +228,26 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         uiUpdateHandler.removeCallbacks(uiUpdateRunnable) // stop updates when activity stops
     }
+//    private var updateJob: Job? = null
 
+    override fun onResume() {
+        super.onResume()
+        compassManager.start()
+
+//        updateJob = lifecycleScope.launch {
+//            while (isActive) {
+//                showPointsOnCompas(this@MainActivity, fullLocationsList)
+//                delay(500)
+//            }
+//        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        compassManager.stop()
+//        updateJob?.cancel()
+
+    }
     private fun requestIgnoreBatteryOptimizations() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
