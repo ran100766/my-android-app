@@ -20,7 +20,7 @@ import com.example.gpscompass.R
 
     private var currentDegree = 0f  // <-- declare here
 private var smoothedAzimuth = 0f
-private const val ALPHA = 0.2f // smaller = smoother (0.05–0.2 typical)
+private const val ALPHA = 0.5f // smaller = smoother (0.05–0.2 typical)
 
 /**
  * Smoothly rotates the compass background or arrow according to azimuth.
@@ -33,28 +33,31 @@ fun showCompasArrow(
 ) {
     val arrowStatic = false
 
-    // ✅ Smooth the azimuth using a low-pass filter
-    smoothedAzimuth = smoothedAzimuth + ALPHA * (azimuth - smoothedAzimuth)
+    // ✅ Smooth azimuth with a low-pass filter
+    smoothedAzimuth = smoothedAzimuth + ALPHA * ((azimuth - smoothedAzimuth + 540) % 360 - 180)
+
+    // Normalize to 0–360
+    if (smoothedAzimuth < 0) smoothedAzimuth += 360f
+    if (smoothedAzimuth >= 360f) smoothedAzimuth -= 360f
 
     // ✅ Update direction text
     tvDirection.text = "Direction: %.0f°".format(smoothedAzimuth)
 
     if (arrowStatic) {
-        // 🧭 If we use a rotating arrow instead of rotating the background
+        // 🧭 If we rotate an arrow instead of the background
         val arrow = activity.findViewById<ImageView>(R.id.directionArrow)
 
         arrow.animate()
             .rotation(-smoothedAzimuth)
-            .setDuration(300)
+            .setDuration(150)
             .setInterpolator(LinearInterpolator())
             .start()
 
     } else {
-        // 🧭 Rotate the compass background smoothly
         val compassBackground = activity.findViewById<ImageView>(R.id.compassBackground)
 
-        // Compute shortest rotation direction
-        val delta = ((smoothedAzimuth - currentDegree + 540) % 360) - 180
+        // ✅ Calculate shortest rotation path
+        val delta = ((azimuth - currentDegree + 540) % 360) - 180
         val targetRotation = currentDegree + delta
 
         compassBackground.animate()
@@ -66,6 +69,7 @@ fun showCompasArrow(
         currentDegree = targetRotation
     }
 }
+
 private val previousBearings = mutableMapOf<String, Float>()
 private val smoothedBearings = mutableMapOf<String, Float>()
 private const val MARKER_ALPHA = 0.2f // lower = smoother
