@@ -19,105 +19,98 @@ import com.example.gpscompass.R
     private val visibleLines = mutableListOf<String>() // 👈 store currently visible lines
 
     private var currentDegree = 0f  // <-- declare here
+private var smoothedAzimuth = 0f
+private const val ALPHA = 0.2f // smaller = smoother (0.05–0.2 typical)
 
-    fun showCompasArrow(activity: Activity, fullLocationsList: List<NavigationResult>, azimuth: Float, tvDirection : TextView)
-    {
-        val arrowStatic = false
+/**
+ * Smoothly rotates the compass background or arrow according to azimuth.
+ */
+fun showCompasArrow(
+    activity: Activity,
+    fullLocationsList: List<NavigationResult>,
+    azimuth: Float,
+    tvDirection: TextView
+) {
+    val arrowStatic = false
 
-        tvDirection.text = "Direction: %.0f°".format(azimuth)
+    // ✅ Smooth the azimuth using a low-pass filter
+    smoothedAzimuth = smoothedAzimuth + ALPHA * (azimuth - smoothedAzimuth)
 
-        if (arrowStatic) {
-            val arrow = activity.findViewById<ImageView>(R.id.directionArrow)
-            val animator =
-                ObjectAnimator.ofFloat(arrow, "rotation", arrow.rotation, azimuth)
-            animator.duration = 300  // milliseconds
-            animator.interpolator = LinearInterpolator()
-            animator.start()
-        } else {
-            val compassBackground = activity.findViewById<ImageView>(R.id.compassBackground)
+    // ✅ Update direction text
+    tvDirection.text = "Direction: %.0f°".format(smoothedAzimuth)
 
-            val rotateAnimation = RotateAnimation(
-                currentDegree,
-                -azimuth,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            )
-            rotateAnimation.duration = 500   // smoother transition
-            rotateAnimation.fillAfter = true
+    if (arrowStatic) {
+        // 🧭 If we use a rotating arrow instead of rotating the background
+        val arrow = activity.findViewById<ImageView>(R.id.directionArrow)
 
-            compassBackground.startAnimation(rotateAnimation)
+        arrow.animate()
+            .rotation(-smoothedAzimuth)
+            .setDuration(300)
+            .setInterpolator(LinearInterpolator())
+            .start()
 
-            currentDegree = -azimuth
+    } else {
+        // 🧭 Rotate the compass background smoothly
+        val compassBackground = activity.findViewById<ImageView>(R.id.compassBackground)
 
-//
-//            for (r in fullLocationsList) {
-//                if (r.newBearing)
-//                {
-//                    r.bearing = r.bearing - azimuth
-//                    if (r.bearing < 0) {
-//                        r.bearing += 360f
-//                    }
-//                    r.newBearing= false
-//                }
-//            }
+        // Compute shortest rotation direction
+        val delta = ((smoothedAzimuth - currentDegree + 540) % 360) - 180
+        val targetRotation = currentDegree + delta
 
-        }
+        compassBackground.animate()
+            .rotation(-targetRotation)
+            .setDuration(350)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
+
+        currentDegree = targetRotation
+    }
+}
+private val previousBearings = mutableMapOf<String, Float>()
+private val smoothedBearings = mutableMapOf<String, Float>()
+private const val MARKER_ALPHA = 0.2f // lower = smoother
+
+fun showPointsOnCompas(
+    activity: Activity,
+    fullLocationsList: List<NavigationResult>,
+    azimuth: Float
+) {
+    val markerView = activity.findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
+
+    val visibleLocationsList = if (visibleLines.isEmpty()) {
+        fullLocationsList
+            .sortedBy { it.distance }
+            .take(5)
+    } else {
+        fullLocationsList
+            .filter { r ->
+                visibleLines.any { line -> line.contains(r.point.name.take(14)) }
+            }
+            .sortedBy { it.distance }
     }
 
-    fun showPointsOnCompas(activity: Activity,fullLocationsList: List<NavigationResult>, azimuth: Float)
-    {
-        val markerView = activity.findViewById<AzimuthMarkerView>(R.id.azimuthMarker)
-        var bearingToDisplay: Float = 0f
+    val markerList = visibleLocationsList.map { r ->
+        var bearingToDisplay = (r.bearing - azimuth + 360f) % 360f
 
-        val visibleLocationsList = if (visibleLines.isEmpty()) {
-            // If no lines are visible yet, take the first 5 from the full list
-            fullLocationsList
-                .sortedBy { it.distance }
-                .take(5)
-                .map { r ->
+        // --- Smooth bearing ---
+        val key = r.point.name
+        val lastBearing = smoothedBearings[key] ?: bearingToDisplay
+        val delta = ((bearingToDisplay - lastBearing + 540f) % 360f) - 180f // shortest path
+        val smoothed = (lastBearing + MARKER_ALPHA * delta + 360f) % 360f
+        smoothedBearings[key] = smoothed
 
-
-                    bearingToDisplay = r.bearing - azimuth
-                    if (bearingToDisplay < 0) {
-                        bearingToDisplay += 360f
-                    }
-
-
-
-                    Marker(
-                        azimuth = bearingToDisplay,
-                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
-                        radius = 100f,
-                        drawAtCenter = r.atPoint,
-                        distance = (r.distance * 1).toInt()
-                    )
-                }
-        } else {
-            // Otherwise, filter by visible lines
-            fullLocationsList
-                .filter { r ->
-                    visibleLines.any { line -> line.contains(r.point.name.take(14)) }
-                }
-                .sortedBy { it.distance }
-                .map { r ->
-
-                    bearingToDisplay = r.bearing - azimuth
-                    if (bearingToDisplay < 0) {
-                        bearingToDisplay += 360f
-                    }
-
-                    Marker(
-                        azimuth = bearingToDisplay,
-                        color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
-                        radius = 100f,
-                        drawAtCenter = r.atPoint,
-                        distance = (r.distance * 1).toInt()
-                    )
-                }
-        }
-
-        markerView.setMarkers(visibleLocationsList)
+        Marker(
+            azimuth = smoothed,
+            color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
+            radius = 100f,
+            drawAtCenter = r.atPoint,
+            distance = r.distance.toInt()
+        )
     }
+
+    // ✅ Update marker view
+    markerView.setMarkers(markerList)
+}
 
 
 
