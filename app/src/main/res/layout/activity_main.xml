@@ -68,45 +68,51 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-
         <!-- Compass with arrow -->
         <FrameLayout
             android:layout_width="300dp"
             android:layout_height="300dp"
             android:layout_gravity="center">
 
+            <!-- Outer circle (light green border) -->
             <ImageView
                 android:id="@+id/compassCircle"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 android:src="@drawable/circle" />
 
-
+            <!-- Compass rose (the background graphic) -->
             <ImageView
                 android:id="@+id/compassBackground"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="50dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
                 android:src="@drawable/compass_rose" />
 
+            <!-- Markers (circles on the circumference) -->
             <com.example.gps_compas.AzimuthMarkerView
                 android:id="@+id/azimuthMarker"
                 android:layout_width="match_parent"
-                android:layout_height="281dp" />
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
 
+            <!-- Direction arrow -->
             <ImageView
                 android:id="@+id/directionArrow"
-                android:layout_width="150dp"
-                android:layout_height="350dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:scaleType="fitXY"
-                android:src="@drawable/arrow"/>
-<!--                app:tint="@android:color/holo_blue_dark" -->
+                android:scaleType="fitCenter"
+                android:src="@drawable/arrow" />
+
+
         </FrameLayout>
+
     </LinearLayout>
 
 

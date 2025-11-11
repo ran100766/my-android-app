@@ -34,7 +34,8 @@ class AzimuthMarkerView @JvmOverloads constructor(
 
         val centerX = width / 2f
         val centerY = height / 2f
-        val radius = (width.coerceAtMost(height) / 2f) - 40f
+//        val radius = (width.coerceAtMost(height) / 2f) - 40f
+        val radius =400
 
         var index = 0;
         for (m in markers) {

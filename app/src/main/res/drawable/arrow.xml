@@ -1,7 +1,28 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#228B22" android:viewportHeight="960" android:viewportWidth="960" android:width="24dp">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="400dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
 
+    <!-- Taller, centered arrow in deep green -->
     <path
-        android:fillColor="#80FFFFFF"
-        android:pathData="M320,820L320,580L120,580L480,140L840,580L640,580L640,820L320,820ZM400,740L560,740L560,500L671,500L480,266L289,500L400,500L400,740ZM480,500L480,500L480,500L480,500L480,500L480,500L480,500Z"/>
-    
+        android:fillColor="#80228B22"
+        android:pathData="M360,900
+                          L360,600
+                          L160,600
+                          L480,80
+                          L800,600
+                          L600,600
+                          L600,900
+                          L360,900
+                          Z
+                          M440,820
+                          L520,820
+                          L520,540
+                          L660,540
+                          L480,260
+                          L300,540
+                          L440,540
+                          L440,820
+                          Z" />
 </vector>
