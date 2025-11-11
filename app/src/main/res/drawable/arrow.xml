@@ -6,7 +6,7 @@
 
     <!-- Taller, centered arrow in deep green -->
     <path
-        android:fillColor="#80228B22"
+        android:fillColor="#80006400"
         android:pathData="M360,900
                           L360,600
                           L160,600
