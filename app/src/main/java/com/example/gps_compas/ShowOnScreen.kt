@@ -1,18 +1,12 @@
 package com.example.gps_compas
 
-import android.animation.ObjectAnimator
 import android.app.Activity
 import android.graphics.Typeface
-import android.location.Location
 import android.util.Log
-import android.view.animation.Animation
-import android.view.animation.LinearInterpolator
-import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import com.example.gpscompass.LocationService.Companion.latestLocation
 import com.example.gpscompass.MainActivity.NavigationResult
 import com.example.gpscompass.R
 
@@ -88,7 +82,7 @@ fun showPointsOnCompas(
 
         Marker(
             azimuth = smoothed,
-            color = MarkerConfig.colors[r.index % MarkerConfig.colors.size],
+            color = MarkerColor.colors[r.index % MarkerColor.colors.size],
             radius = 100f,
             drawAtCenter = r.atPoint,
             distance = r.distance.toInt()
@@ -123,7 +117,7 @@ fun showPointsOnCompas(
 
             tv.setPadding(16, 16, 16, 16)
             // Set background color, cycling through list if more points than colors
-            tv.setBackgroundColor(MarkerConfig.colors[point.index % MarkerConfig.colors.size])
+            tv.setBackgroundColor(MarkerColor.colors[point.index % MarkerColor.colors.size])
             pointsContainer.addView(tv)
         }
     }

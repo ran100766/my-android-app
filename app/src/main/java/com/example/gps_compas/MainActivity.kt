@@ -2,10 +2,8 @@ package com.example.gpscompass
 
 import CompassManager
 import android.Manifest
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.location.Location
 import android.net.Uri
 import android.os.Build
@@ -14,16 +12,9 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.ImageView
-import android.view.animation.LinearInterpolator
-import android.view.animation.RotateAnimation
-import com.example.gps_compas.AzimuthMarkerView
-import com.example.gps_compas.MarkerConfig
-import com.example.gps_compas.Marker
-import android.view.animation.Animation
 import com.google.firebase.FirebaseApp
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -36,9 +27,6 @@ import com.example.gps_compas.showCompasArrow
 import com.example.gps_compas.showPointsOnCompas
 import com.example.gps_compas.showPointsOnList
 import com.example.gps_compas.updateVisibleLines
-import com.example.gpscompass.LocationService.Companion.latestLocation
-import kotlinx.coroutines.Job
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
