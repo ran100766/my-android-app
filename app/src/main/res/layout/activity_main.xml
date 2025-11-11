@@ -100,8 +100,8 @@
 
             <ImageView
                 android:id="@+id/directionArrow"
-                android:layout_width="100dp"
-                android:layout_height="300dp"
+                android:layout_width="150dp"
+                android:layout_height="350dp"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
                 android:src="@drawable/arrow2"/>
