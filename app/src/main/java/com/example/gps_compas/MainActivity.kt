@@ -40,6 +40,7 @@ import com.example.gpscompass.LocationService.Companion.latestLocation
 import kotlinx.coroutines.Job
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
+
 class MainActivity : AppCompatActivity() {
 
     companion object {
@@ -110,6 +111,7 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
     }
+
     var smoothedAzimuth = 0f
     val smoothingFactor = 0.1f  // smaller = smoother
 
@@ -129,6 +131,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // must match activity_main.xml
+
+        val arrowImage = findViewById<ImageView>(R.id.compassCircle)
+        arrowImage.setImageResource(R.drawable.circle)
 
         compassManager = CompassManager(this) { azimuth ->
             smoothedAzimuth = smoothAzimuth(smoothedAzimuth, azimuth)
@@ -169,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
 // Add a scroll listener
         scrollView.viewTreeObserver.addOnScrollChangedListener {
-            updateVisibleLines(this , scrollView, pointsContainer , fullLocationsList)
+            updateVisibleLines(this, scrollView, pointsContainer, fullLocationsList)
         }
     }
 
@@ -214,7 +219,7 @@ class MainActivity : AppCompatActivity() {
 
 //        showCompasArrow(this, fullLocationsList, location)
 //        showPointsOnCompas(this,fullLocationsList, location)
-        showPointsOnList(this,fullLocationsList)
+        showPointsOnList(this, fullLocationsList)
 
 
     }
@@ -248,6 +253,7 @@ class MainActivity : AppCompatActivity() {
 //        updateJob?.cancel()
 
     }
+
     private fun requestIgnoreBatteryOptimizations() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager

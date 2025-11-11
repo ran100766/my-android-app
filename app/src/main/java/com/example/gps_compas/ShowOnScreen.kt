@@ -49,7 +49,7 @@ fun showCompasArrow(
 
         arrow.animate()
             .rotation(-smoothedAzimuth)
-            .setDuration(150)
+            .setDuration(100)
             .setInterpolator(LinearInterpolator())
             .start()
 
@@ -62,7 +62,7 @@ fun showCompasArrow(
 
         compassBackground.animate()
             .rotation(-targetRotation)
-            .setDuration(350)
+            .setDuration(150)
             .setInterpolator(android.view.animation.DecelerateInterpolator())
             .start()
 
