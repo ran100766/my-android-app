@@ -104,7 +104,7 @@
                 android:layout_height="350dp"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
-                android:src="@drawable/arrow2"/>
+                android:src="@drawable/arrow"/>
 <!--                app:tint="@android:color/holo_blue_dark" -->
         </FrameLayout>
     </LinearLayout>

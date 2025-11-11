@@ -14,7 +14,7 @@ object MarkerColor {
         Color.parseColor("#FFCF6679"), // light red
         Color.parseColor("#FFFFCC80"), // light orange
         Color.parseColor("#FFFFF59D"), // light yellow
-        Color.parseColor("#FF80E27E"), // light green
+//        Color.parseColor("#FF80E27E"), // light green
         Color.parseColor("#FF82B1FF"), // light blue
         Color.parseColor("#FF9FA8DA"), // light indigo
         Color.parseColor("#FFF48FB1"), // light pink
@@ -26,7 +26,7 @@ object MarkerColor {
         Color.parseColor("#FFB00020"), // medium red
         Color.parseColor("#FFFF9800"), // medium orange
         Color.parseColor("#FFFFEB3B"), // medium yellow
-        Color.parseColor("#FF4CAF50"), // medium green
+//        Color.parseColor("#FF4CAF50"), // medium green
         Color.parseColor("#FF2196F3"), // medium blue
         Color.parseColor("#FF3F51B5"), // medium indigo
         Color.parseColor("#FFE91E63"), // medium pink
@@ -38,7 +38,7 @@ object MarkerColor {
         Color.parseColor("#FF790000"), // dark red
         Color.parseColor("#FFF57C00"), // dark orange
         Color.parseColor("#FFFBC02D"), // dark yellow
-        Color.parseColor("#FF388E3C"), // dark green
+//        Color.parseColor("#FF388E3C"), // dark green
         Color.parseColor("#FF1976D2"), // dark blue
         Color.parseColor("#FF303F9F"), // dark indigo
         Color.parseColor("#FFC2185B"), // dark pink
