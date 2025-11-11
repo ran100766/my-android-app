@@ -19,12 +19,7 @@ import com.example.gpscompass.R
     private val visibleLines = mutableListOf<String>() // 👈 store currently visible lines
 
     private var currentDegree = 0f  // <-- declare here
-private var smoothedAzimuth = 0f
-private const val ALPHA = 0.5f // smaller = smoother (0.05–0.2 typical)
 
-/**
- * Smoothly rotates the compass background or arrow according to azimuth.
- */
 fun showCompasArrow(
     activity: Activity,
     fullLocationsList: List<NavigationResult>,
@@ -33,38 +28,26 @@ fun showCompasArrow(
 ) {
     val arrowStatic = false
 
-    // ✅ Smooth azimuth with a low-pass filter
-    smoothedAzimuth = smoothedAzimuth + ALPHA * ((azimuth - smoothedAzimuth + 540) % 360 - 180)
+    // ✅ Use raw azimuth (no smoothing)
+    val displayAzimuth = azimuth
 
     // Normalize to 0–360
-    if (smoothedAzimuth < 0) smoothedAzimuth += 360f
-    if (smoothedAzimuth >= 360f) smoothedAzimuth -= 360f
+    val normalizedAzimuth = (displayAzimuth + 360) % 360
 
-    // ✅ Update direction text
-    tvDirection.text = "Direction: %.0f°".format(smoothedAzimuth)
+    // Update direction text
+    tvDirection.text = "Direction: %.0f°".format(normalizedAzimuth)
 
     if (arrowStatic) {
-        // 🧭 If we rotate an arrow instead of the background
         val arrow = activity.findViewById<ImageView>(R.id.directionArrow)
-
-        arrow.animate()
-            .rotation(-smoothedAzimuth)
-            .setDuration(100)
-            .setInterpolator(LinearInterpolator())
-            .start()
-
+        arrow.rotation = -normalizedAzimuth   // instant
     } else {
         val compassBackground = activity.findViewById<ImageView>(R.id.compassBackground)
 
-        // ✅ Calculate shortest rotation path
-        val delta = ((azimuth - currentDegree + 540) % 360) - 180
+        // Calculate shortest rotation path
+        val delta = ((normalizedAzimuth - currentDegree + 540) % 360) - 180
         val targetRotation = currentDegree + delta
 
-        compassBackground.animate()
-            .rotation(-targetRotation)
-            .setDuration(150)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
-            .start()
+        compassBackground.rotation = -targetRotation   // instant
 
         currentDegree = targetRotation
     }
