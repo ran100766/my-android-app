@@ -92,7 +92,7 @@
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                android:src="@drawable/compass_rose" />
+                android:src="@drawable/north_arrow" />
 
             <!-- Markers (circles on the circumference) -->
             <com.example.gps_compas.AzimuthMarkerView
